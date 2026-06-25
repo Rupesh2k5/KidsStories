@@ -44,7 +44,7 @@ const Profile = () => {
     <div className="container" style={{ minHeight: '80vh', paddingTop: '120px', paddingBottom: '60px' }}>
       <h2 className="text-gradient mb-4" style={{ fontSize: '2.5rem' }}>Your Magical Profile</h2>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '30px' }} className="profile-grid">
+      <div className="profile-grid">
         
         {/* User Info */}
         <div className="glass-panel" style={{ padding: '30px', height: 'fit-content' }}>

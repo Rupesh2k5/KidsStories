@@ -197,3 +197,16 @@ section {
 .gap-2 { gap: 0.5rem; }
 .gap-4 { gap: 1rem; }
 .grid { display: grid; }
+
+/* Profile Grid */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
+}
+
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
