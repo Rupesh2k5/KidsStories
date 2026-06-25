@@ -122,15 +122,15 @@ const Home = () => {
           {books.map((book) => (
             <div key={book._id} className="product-card glass-panel" style={book.model === 'Bundle' ? { border: '4px solid var(--secondary)' } : {}}>
               {book.model === 'Bundle' && <div className="bundle-badge">BEST VALUE</div>}
-              <img src={book.image.startsWith('http') ? book.image : book1} alt={book.brand} className="product-image" style={book.model === 'Bundle' ? {height: '200px', objectFit: 'contain'} : {}} />
+              <img src={book.image && book.image.startsWith('http') ? book.image : book1} alt={book.brand} className="product-image" style={book.model === 'Bundle' ? {height: '200px', objectFit: 'contain'} : {}} />
               <div className="product-info">
                 <h3>{book.brand} {book.model !== 'Single Book' && book.model !== 'Bundle' ? book.model : ''}</h3>
                 <p>{book.description || `Magical ${book.brand} adventure.`}</p>
                 <div className="product-price">₹{book.pricePerDay}</div>
                 <div className="flex gap-4 mt-2" style={{ display: 'flex', gap: '15px' }}>
-                  <button className="btn btn-secondary flex-1" onClick={() => addToCart({ id: book._id, name: book.brand, price: book.pricePerDay, image: book.image.startsWith('http') ? book.image : book1 })}>Add to Cart</button>
+                  <button className="btn btn-secondary flex-1" onClick={() => addToCart({ id: book._id, name: book.brand, price: book.pricePerDay, image: book.image && book.image.startsWith('http') ? book.image : book1 })}>Add to Cart</button>
                   <button className="btn btn-primary flex-1" onClick={() => {
-                    addToCart({ id: book._id, name: book.brand, price: book.pricePerDay, image: book.image.startsWith('http') ? book.image : book1 });
+                    addToCart({ id: book._id, name: book.brand, price: book.pricePerDay, image: book.image && book.image.startsWith('http') ? book.image : book1 });
                     navigate('/checkout');
                   }}>Buy Now</button>
                 </div>
