@@ -5,6 +5,10 @@ import book from '../models/book.js';
 import user from '../models/user.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dns from 'dns';
+
+// Force Node.js to prefer IPv4 over IPv6 to fix Render timeout issues with Google SMTP
+dns.setDefaultResultOrder('ipv4first');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,7 +16,9 @@ const __dirname = path.dirname(__filename);
 class NotificationService {
     constructor() {
         this.transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false, // use STARTTLS
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
