@@ -12,13 +12,13 @@ export const protect=async(req,res,next)=>{
     }
     try{
         const userId=jwt.verify(token,process.env.JWT_SECRET)
-        if(!userId) {
-            return res.json({success:false, message:"Not Authorized"})
+        const currentUser = await User.findById(userId).select("-password");
+        if (!currentUser) {
+            return res.json({success:false, message:"Not Authorized - User not found in database"});
         }
-        req.user=await User.findById(userId).select("-password")
-    next()
-    }
-    catch(error){
+        req.user = currentUser;
+        next();
+    } catch(error){
         return res.json({success:false, message:error.message})
     }
 }
