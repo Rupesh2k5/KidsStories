@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 
 export const AppContext = createContext();
-export const backendUrl = 'https://kids-stories-backend.onrender.com';
+export const backendUrl = (import.meta.env.VITE_BACKEND_URL || 'https://kidsstories-backend.onrender.com').replace(/\/$/, '');
 
 export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
