@@ -35,7 +35,7 @@ class NotificationService {
 
             const itemsList = cart.map(item => {
                 const dbBook = booksInDb.find(b => b._id.toString() === item.id);
-                const pdfLink = (dbBook && dbBook.pdfUrl) ? dbBook.pdfUrl : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/TheMindroo_Kids_Activity_Book.pdf`;
+                const pdfLink = (dbBook && dbBook.pdfUrl) ? dbBook.pdfUrl : `${process.env.FRONTEND_URL || 'https://kids-stories-olive.vercel.app'}/TheMindroo_Kids_Activity_Book.pdf`;
                 return `📖 ${item.name} (Quantity: ${item.quantity}) - ₹${item.price * item.quantity}\n📥 Download Here: ${pdfLink}`;
             }).join('\n\n');
             
@@ -67,7 +67,7 @@ class NotificationService {
             const userData = orderDoc.user;
 
             const emailSubjectUser = `Order Confirmed: ${bookData.brand} ${bookData.model !== 'Single Book' ? bookData.model : ''}`;
-            const pdfLink = bookData.pdfUrl ? bookData.pdfUrl : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/TheMindroo_Kids_Activity_Book.pdf`;
+            const pdfLink = bookData.pdfUrl ? bookData.pdfUrl : `${process.env.FRONTEND_URL || 'https://kids-stories-olive.vercel.app'}/TheMindroo_Kids_Activity_Book.pdf`;
             const emailTextUser = `Hi ${userData.name},\n\nYour order for ${bookData.brand} has been confirmed.\nAmount Paid: ₹${orderDoc.price}\n\n📥 DOWNLOAD LINK:\n${pdfLink}\n\nThank you for choosing KidsStories!`;
 
             // Send Emails
