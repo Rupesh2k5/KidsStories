@@ -37,7 +37,16 @@ class NotificationService {
             if (!userData) return;
 
             const bookIds = cart.map(item => item.id);
-            const booksInDb = await book.find({ _id: { $in: bookIds } });
+            let booksInDb = [];
+            try {
+                // Filter out non-24-character hex strings to prevent CastError
+                const validBookIds = bookIds.filter(id => id && id.length === 24);
+                if (validBookIds.length > 0) {
+                    booksInDb = await book.find({ _id: { $in: validBookIds } });
+                }
+            } catch (err) {
+                console.log("Could not fetch books for notification (might be dummy books), proceeding with fallbacks.");
+            }
 
             const itemsList = cart.map(item => {
                 const dbBook = booksInDb.find(b => b._id.toString() === item.id);
