@@ -1,0 +1,88 @@
+import nodemailer from 'nodemailer';
+import twilio from 'twilio';
+import order from '../models/Orders.js';
+import book from '../models/book.js';
+import user from '../models/user.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+class NotificationService {
+    constructor() {
+        this.transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        // Initialize Twilio client only if credentials exist
+        if (process.env.TWILIO_SID && process.env.TWILIO_TOKEN) {
+            this.twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+        }
+    }
+
+    async sendCartNotification(cart, userId) {
+        try {
+            const userData = await user.findById(userId);
+            if (!userData) return;
+
+            const bookIds = cart.map(item => item.id);
+            const booksInDb = await book.find({ _id: { $in: bookIds } });
+
+            const itemsList = cart.map(item => {
+                const dbBook = booksInDb.find(b => b._id.toString() === item.id);
+                const pdfLink = (dbBook && dbBook.pdfUrl) ? dbBook.pdfUrl : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/TheMindroo_Kids_Activity_Book.pdf`;
+                return `📖 ${item.name} (Quantity: ${item.quantity}) - ₹${item.price * item.quantity}\n📥 Download Here: ${pdfLink}`;
+            }).join('\n\n');
+            
+            const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+            const emailSubjectUser = `Your Magical Books Order is Confirmed! 🎉`;
+            const emailTextUser = `Hi ${userData.name},\n\nThank you for shopping with us! Your order has been successfully placed.\n\n=== YOUR DIGITAL BOOKS ===\n\n${itemsList}\n\n=========================\nTotal Paid: ₹${total}\n\nHappy reading! 📚✨\n\nBest regards,\nKidsStories Team`;
+
+            if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+                await this.transporter.sendMail({
+                    from: `"KidsStories Store" <${process.env.EMAIL_USER}>`,
+                    to: userData.email,
+                    subject: emailSubjectUser,
+                    text: emailTextUser
+                });
+            }
+        } catch (error) {
+            console.error("Notification Service Error:", error);
+        }
+    }
+
+    async sendOrderNotifications(orderId) {
+        try {
+            const orderDoc = await order.findById(orderId).populate('book').populate('user').populate('owner');
+            
+            if (!orderDoc) return;
+
+            const bookData = orderDoc.book;
+            const userData = orderDoc.user;
+
+            const emailSubjectUser = `Order Confirmed: ${bookData.brand} ${bookData.model !== 'Single Book' ? bookData.model : ''}`;
+            const pdfLink = bookData.pdfUrl ? bookData.pdfUrl : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/TheMindroo_Kids_Activity_Book.pdf`;
+            const emailTextUser = `Hi ${userData.name},\n\nYour order for ${bookData.brand} has been confirmed.\nAmount Paid: ₹${orderDoc.price}\n\n📥 DOWNLOAD LINK:\n${pdfLink}\n\nThank you for choosing KidsStories!`;
+
+            // Send Emails
+            if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+                await this.transporter.sendMail({
+                    from: `"KidsStories" <${process.env.EMAIL_USER}>`,
+                    to: userData.email,
+                    subject: emailSubjectUser,
+                    text: emailTextUser
+                });
+            }
+        } catch (error) {
+            console.error("Notification Service Error:", error);
+        }
+    }
+}
+
+export default new NotificationService();
