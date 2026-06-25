@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 
 export const AppContext = createContext();
+export const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
@@ -26,7 +27,7 @@ export const AppProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/user/data', {
+      const res = await fetch(`${backendUrl}/api/user/data`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();

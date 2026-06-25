@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Download, Play, Brain, Heart, BookOpen, QrCode, Copy, Check, X } from 'lucide-react';
-import { AppContext } from '../context/AppContext';
+import { AppContext, backendUrl } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
 import book1 from '../assets/book1.png';
@@ -26,7 +26,7 @@ const Home = () => {
 
   const fetchBooks = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/order/books');
+      const res = await fetch(`${backendUrl}/api/order/books`);
       const data = await res.json();
       if (data.success && data.books.length > 0) {
         setBooks(data.books);

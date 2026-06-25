@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '../context/AppContext';
+import { AppContext, backendUrl } from '../context/AppContext';
 import { CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -21,7 +21,7 @@ const Checkout = () => {
 
     try {
       // 1. Create order
-      const res = await fetch('http://localhost:3000/api/order/cart/create-razorpay-order', {
+      const res = await fetch(`${backendUrl}/api/order/cart/create-razorpay-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ const Checkout = () => {
         order_id: data.order.id,
         handler: async function (response) {
           // 3. Verify Payment
-          const verifyRes = await fetch('http://localhost:3000/api/order/cart/verify-order', {
+          const verifyRes = await fetch(`${backendUrl}/api/order/cart/verify-order`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

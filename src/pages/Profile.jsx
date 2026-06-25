@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext, backendUrl } from '../context/AppContext';
 import { Package, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,7 @@ const Profile = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/order/user-orders', {
+      const res = await fetch(`${backendUrl}/api/order/user-orders`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

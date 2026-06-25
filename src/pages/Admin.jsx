@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext, backendUrl } from '../context/AppContext';
 import { Settings, BookOpen, Activity, Calendar, DollarSign, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -25,8 +25,8 @@ const Admin = () => {
   const fetchData = async () => {
     try {
       const [dashRes, booksRes] = await Promise.all([
-        fetch('http://localhost:3000/api/owner/dashboard', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }),
-        fetch('http://localhost:3000/api/owner/books', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
+        fetch(`${backendUrl}/api/owner/dashboard`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }),
+        fetch(`${backendUrl}/api/owner/books`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
       ]);
       const dashData = await dashRes.json();
       const booksData = await booksRes.json();
@@ -46,7 +46,7 @@ const Admin = () => {
 
   const toggleAvailability = async (bookId) => {
     try {
-      const res = await fetch('http://localhost:3000/api/owner/toggle-book', {
+      const res = await fetch(`${backendUrl}/api/owner/toggle-book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ bookId })
@@ -70,7 +70,7 @@ const Admin = () => {
     formData.append('image', file);
 
     try {
-      const res = await fetch('http://localhost:3000/api/owner/update-book-image', {
+      const res = await fetch(`${backendUrl}/api/owner/update-book-image`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: formData
@@ -96,7 +96,7 @@ const Admin = () => {
     const toastId = toast.loading("Uploading new PDF...");
 
     try {
-      const res = await fetch('http://localhost:3000/api/owner/update-book-pdf', {
+      const res = await fetch(`${backendUrl}/api/owner/update-book-pdf`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: formData
@@ -116,7 +116,7 @@ const Admin = () => {
   const handleDeleteBook = async (bookId) => {
     if (!window.confirm("Are you sure you want to delete this book?")) return;
     try {
-      const res = await fetch('http://localhost:3000/api/owner/delete-book', {
+      const res = await fetch(`${backendUrl}/api/owner/delete-book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ bookId })
@@ -152,7 +152,7 @@ const Admin = () => {
 
       const toastId = toast.loading("Uploading book and PDF... This may take a minute.");
 
-      const res = await fetch('http://localhost:3000/api/owner/add-book', {
+      const res = await fetch(`${backendUrl}/api/owner/add-book`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: payload

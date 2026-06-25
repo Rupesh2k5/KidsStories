@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AppContext } from '../context/AppContext';
+import { AppContext, backendUrl } from '../context/AppContext';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -16,7 +16,7 @@ const Signup = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('http://localhost:3000/api/user/register', {
+      const res = await fetch(`${backendUrl}/api/user/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, role: 'user' })
