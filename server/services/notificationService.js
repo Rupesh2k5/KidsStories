@@ -15,7 +15,7 @@ class NotificationService {
     // Always create fresh — env vars are read at call time, not cold-start.
     getTransporter() {
         return nodemailer.createTransport({
-            host: 'smtp.gmail.com',
+            host: '142.250.110.108', // Hardcoded IPv4 for smtp.gmail.com to guarantee bypass of Render IPv6 block
             port: 465,
             secure: true, // Required to bypass Render's port 587 block
             auth: {
