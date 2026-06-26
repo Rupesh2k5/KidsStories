@@ -146,10 +146,12 @@ export const verifyAndCreateOrder = async (req, res) => {
 
         await newOrder.save();
 
-        // Fire-and-forget email sending
-        NotificationService.sendOrderNotifications(newOrder._id)
-            .then(() => console.log('✅ Email sent'))
-            .catch(err => console.error('❌ Email error:', err));
+        // AWAIT on Vercel is mandatory because fire-and-forget dies when res is sent
+        try {
+            await NotificationService.sendOrderNotifications(newOrder._id);
+        } catch (emailErr) {
+            console.error('❌ Email error:', emailErr);
+        }
 
         res.json({ success: true, message: 'Order Created and Payment Verified' });
 
@@ -210,10 +212,12 @@ export const verifyCartOrder = async (req, res) => {
             await newOrder.save();
         }
 
-        // Fire-and-forget email sending
-        NotificationService.sendCartNotification(cart, _id)
-            .then(() => console.log('✅ Email sent'))
-            .catch(err => console.error('❌ Email error:', err));
+        // AWAIT on Vercel is mandatory
+        try {
+            await NotificationService.sendCartNotification(cart, _id);
+        } catch (emailErr) {
+            console.error('❌ Email error:', emailErr);
+        }
 
         res.json({ success: true, message: 'Cart Payment Verified and Orders Created!' });
 
@@ -249,10 +253,12 @@ export const createBypassedOrder = async (req, res) => {
             paymentId: 'pay_later'
         });
 
-        // Fire-and-forget email sending
-        NotificationService.sendOrderNotifications(newOrder._id)
-            .then(() => console.log('✅ Email sent'))
-            .catch(err => console.error('❌ Email error:', err));
+        // AWAIT on Vercel is mandatory
+        try {
+            await NotificationService.sendOrderNotifications(newOrder._id);
+        } catch (emailErr) {
+            console.error('❌ Email error:', emailErr);
+        }
 
         res.json({ success: true, message: 'Order Created Successfully (Pay Later)' });
 

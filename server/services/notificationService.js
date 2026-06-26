@@ -2,22 +2,17 @@ import nodemailer from 'nodemailer';
 import order from '../models/Orders.js';
 import book from '../models/book.js';
 import user from '../models/user.js';
-import https from 'https';
-import http from 'http';
 import dns from 'dns';
 
-// Force Node.js to prefer IPv4 over IPv6 to fix Render timeout issues with Google SMTP
 dns.setDefaultResultOrder('ipv4first');
 
 class NotificationService {
 
-    // ✅ FIX 1: Never build transporter at import time.
-    // Always create fresh — env vars are read at call time, not cold-start.
     getTransporter() {
         return nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 465,
-            secure: true, // Required to bypass Render's port 587 block
+            secure: true,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
@@ -25,91 +20,15 @@ class NotificationService {
             connectionTimeout: 10000,
             greetingTimeout: 10000,
             socketTimeout: 15000,
-            tls: {
-                servername: 'smtp.gmail.com'
-            },
-            // Force IPv4 natively at the socket level
+            tls: { servername: 'smtp.gmail.com' },
             family: 4
         });
     }
 
-    // ✅ FIX 2: Download PDF from a URL into a Buffer (no filesystem — works on Vercel)
-    fetchPdfBuffer(url) {
-        return new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
-                reject(new Error('PDF fetch timeout after 5 seconds'));
-            }, 5000);
-
-            const get = url.startsWith('https') ? https.get.bind(https) : http.get.bind(http);
-
-            const doGet = (targetUrl) => {
-                get(targetUrl, (res) => {
-                    // Follow redirects (301/302)
-                    if (res.statusCode === 301 || res.statusCode === 302) {
-                        return doGet(res.headers.location);
-                    }
-                    if (res.statusCode !== 200) {
-                        return reject(new Error(`PDF fetch failed with status ${res.statusCode}`));
-                    }
-                    const chunks = [];
-                    res.on('data', chunk => chunks.push(chunk));
-                    res.on('end', () => {
-                        clearTimeout(timeout);
-                        resolve(Buffer.concat(chunks));
-                    });
-                    res.on('error', (err) => {
-                        clearTimeout(timeout);
-                        reject(err);
-                    });
-                }).on('error', (err) => {
-                    clearTimeout(timeout);
-                    reject(err);
-                });
-            };
-
-            doGet(url);
-        });
-    }
-
-    // ✅ FIX 3: Exponential backoff retry for concurrent email sends (solves Gmail rate limits/timeouts)
-    async sendMailWithRetry(transporter, mailOptions, retries = 3, delay = 1000) {
-        for (let attempt = 1; attempt <= retries; attempt++) {
-            try {
-                return await transporter.sendMail(mailOptions);
-            } catch (err) {
-                console.warn(`⚠️ Email attempt ${attempt} failed: ${err.message}`);
-                if (attempt === retries) throw err;
-                await new Promise(resolve => setTimeout(resolve, delay * attempt));
-            }
-        }
-    }
-
-    // Download PDF and return nodemailer attachment array
-    async buildPdfAttachment(pdfUrl, fileName = 'YourBook.pdf') {
-        try {
-            console.log(`📥 Fetching PDF from: ${pdfUrl}`);
-            const pdfBuffer = await this.fetchPdfBuffer(pdfUrl);
-            console.log(`✅ PDF fetched — size: ${pdfBuffer.length} bytes`);
-            return [{
-                filename: fileName,
-                content: pdfBuffer,
-                contentType: 'application/pdf'
-            }];
-        } catch (err) {
-            // Graceful fallback — email still sends, just without attachment
-            console.error('⚠️ Could not fetch PDF for attachment:', err.message);
-            return [];
-        }
-    }
-
-    // ─────────────────────────────────────────────
-    // SEND ORDER NOTIFICATION (single book purchase)
-    // ─────────────────────────────────────────────
     async sendOrderNotifications(orderId) {
         console.log(`📧 sendOrderNotifications called — orderId: ${orderId}`);
-
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-            console.error('❌ EMAIL_USER or EMAIL_PASS missing from environment!');
+            console.error('❌ EMAIL_USER or EMAIL_PASS missing');
             return;
         }
 
@@ -120,27 +39,21 @@ class NotificationService {
                 .populate('owner');
 
             if (!orderDoc) {
-                console.error(`❌ Order ${orderId} not found in DB`);
+                console.error(`❌ Order ${orderId} not found`);
                 return;
             }
 
             const bookData = orderDoc.book;
             const userData = orderDoc.user;
-
             if (!userData?.email) {
-                console.error('❌ User has no email address');
+                console.error('❌ User has no email');
                 return;
             }
 
             const uniqueId = orderId.toString().slice(-6).toUpperCase();
             const bookTitle = `${bookData.brand}${bookData.model && bookData.model !== 'Single Book' ? ' ' + bookData.model : ''}`;
-            const pdfUrl = bookData.pdfUrl ||
+            const pdfUrl = bookData.pdfUrl || 
                 `${process.env.FRONTEND_URL || 'https://kids-stories-olive.vercel.app'}/TheMindroo_Kids_Activity_Book.pdf`;
-            const safeFileName = `${bookData.brand.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-
-            // ✅ Attach the PDF
-            const attachments = await this.buildPdfAttachment(pdfUrl, safeFileName);
-            const hasAttachment = attachments.length > 0;
 
             const emailHtml = `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px; border-radius: 8px;">
@@ -158,18 +71,13 @@ class NotificationService {
       <p style="margin: 8px 0 0;"><strong>💰 Amount Paid:</strong> ₹${orderDoc.price}</p>
     </div>
 
-    ${hasAttachment
-        ? `<div style="background: #e8f5e9; border: 2px dashed #4caf50; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-        <p style="font-size: 18px; margin: 0; color: #2e7d32;">📎 <strong>Your book PDF is attached to this email!</strong></p>
-        <p style="color: #555; margin: 8px 0 0; font-size: 14px;">Open the attachment to read it. Save it to your device for offline access anytime.</p>
-      </div>`
-        : `<div style="background: #fff3e0; border: 2px solid #ff9800; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-        <p style="font-size: 16px; margin: 0;">📥 <strong>Download your book here:</strong></p>
-        <a href="${pdfUrl}" style="display: inline-block; margin-top: 12px; background: #6c3fc5; color: white; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 15px;">
-          📖 Download PDF
-        </a>
-      </div>`
-    }
+    <!-- Download button -->
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${pdfUrl}" style="display: inline-block; background: #6c3fc5; color: white; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;">
+        📖 Download Your Book Now
+      </a>
+      <p style="color: #888; font-size: 13px; margin-top: 8px;">(Right-click and "Save link as" to save the PDF)</p>
+    </div>
 
     <p style="color: #888; font-size: 13px; margin-top: 28px;">Questions? Just reply to this email.</p>
     <p style="color: #6c3fc5; font-weight: bold; font-size: 15px;">Happy reading! 📖✨<br>— The KidsStories Team</p>
@@ -177,17 +85,15 @@ class NotificationService {
 </div>`;
 
             const transporter = this.getTransporter();
-            const mailOptions = {
+            const result = await transporter.sendMail({
                 from: `"KidsStories" <${process.env.EMAIL_USER}>`,
                 to: userData.email,
                 subject: `📚 Your Book is Ready — Order #${uniqueId} Confirmed!`,
                 html: emailHtml,
-                text: `Hi ${userData.name},\n\nOrder #${uniqueId} confirmed!\nBook: ${bookTitle}\nAmount: ₹${orderDoc.price}\n\n${hasAttachment ? 'Your PDF is attached to this email!' : `Download here: ${pdfUrl}`}\n\nHappy reading!\n— KidsStories Team`,
-                attachments
-            };
+                text: `Hi ${userData.name},\n\nOrder #${uniqueId} confirmed!\nBook: ${bookTitle}\nAmount: ₹${orderDoc.price}\n\nDownload your book here: ${pdfUrl}\n\nHappy reading!\n— KidsStories Team`
+            });
 
-            const result = await this.sendMailWithRetry(transporter, mailOptions);
-            console.log(`✅ Order email sent to ${userData.email} | MessageID: ${result.messageId} | PDF attached: ${hasAttachment}`);
+            console.log(`✅ Order email sent to ${userData.email} | MessageID: ${result.messageId}`);
 
         } catch (error) {
             console.error('❌ sendOrderNotifications FAILED:', error.message);
@@ -195,66 +101,41 @@ class NotificationService {
         }
     }
 
-    // ─────────────────────────────────────────────
-    // SEND CART NOTIFICATION (multi-book purchase)
-    // ─────────────────────────────────────────────
     async sendCartNotification(cart, userId) {
         console.log(`📧 sendCartNotification called — userId: ${userId}`);
-
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-            console.error('❌ EMAIL_USER or EMAIL_PASS missing from environment!');
+            console.error('❌ EMAIL_USER or EMAIL_PASS missing');
             return;
         }
 
         try {
             const userData = await user.findById(userId);
             if (!userData?.email) {
-                console.error('❌ User not found or has no email');
+                console.error('❌ User not found or no email');
                 return;
             }
 
-            // Fetch real DB books to get pdfUrls
-            const validBookIds = cart.map(i => i.id).filter(id => id && id.length === 24);
+            const bookIds = cart.map(i => i.id).filter(id => id && id.length === 24);
             let booksInDb = [];
-            if (validBookIds.length > 0) {
-                booksInDb = await book.find({ _id: { $in: validBookIds } });
+            if (bookIds.length) {
+                booksInDb = await book.find({ _id: { $in: bookIds } });
             }
 
             const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
             const uniqueId = Math.floor(100000 + Math.random() * 900000);
 
-            // Build deduplicated PDF attachments
-            const allAttachments = [];
-            const attachedUrls = new Set();
-
-            for (const item of cart) {
+            let itemRows = cart.map(item => {
                 const dbBook = booksInDb.find(b => b._id.toString() === item.id);
-                const pdfUrl = (dbBook && dbBook.pdfUrl)
-                    ? dbBook.pdfUrl
-                    : `${process.env.FRONTEND_URL || 'https://kids-stories-olive.vercel.app'}/TheMindroo_Kids_Activity_Book.pdf`;
-
-                if (!attachedUrls.has(pdfUrl)) {
-                    attachedUrls.add(pdfUrl);
-                    const safeFileName = `${item.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-                    const att = await this.buildPdfAttachment(pdfUrl, safeFileName);
-                    allAttachments.push(...att);
-                }
-            }
-
-            const hasAttachments = allAttachments.length > 0;
-
-            // Build item rows for HTML email
-            const itemRows = cart.map(item => {
-                const dbBook = booksInDb.find(b => b._id.toString() === item.id);
-                const pdfUrl = (dbBook && dbBook.pdfUrl)
-                    ? dbBook.pdfUrl
-                    : `${process.env.FRONTEND_URL || 'https://kids-stories-olive.vercel.app'}/TheMindroo_Kids_Activity_Book.pdf`;
+                const pdfUrl = (dbBook && dbBook.pdfUrl) ? dbBook.pdfUrl :
+                    `${process.env.FRONTEND_URL || 'https://kids-stories-olive.vercel.app'}/TheMindroo_Kids_Activity_Book.pdf`;
                 return `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #eee;">📖 ${item.name}</td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">×${item.quantity}</td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price * item.quantity}</td>
-      ${!hasAttachments ? `<td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;"><a href="${pdfUrl}" style="color: #6c3fc5; font-weight: bold;">Download</a></td>` : '<td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center; color: #4caf50;">📎 Attached</td>'}
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+        <a href="${pdfUrl}" style="color: #6c3fc5; font-weight: bold;">Download</a>
+      </td>
     </tr>`;
             }).join('');
 
@@ -266,14 +147,13 @@ class NotificationService {
   </div>
   <div style="background: white; padding: 30px; border-radius: 0 0 8px 8px;">
     <p style="font-size: 16px;">Hi <strong>${userData.name}</strong>, thank you for your purchase!</p>
-
     <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;">
       <thead>
         <tr style="background: #f0e8ff; color: #333;">
           <th style="padding: 10px; text-align: left;">Book</th>
           <th style="padding: 10px; text-align: center;">Qty</th>
           <th style="padding: 10px; text-align: right;">Price</th>
-          <th style="padding: 10px; text-align: center;">${hasAttachments ? 'Status' : 'Download'}</th>
+          <th style="padding: 10px; text-align: center;">Download</th>
         </tr>
       </thead>
       <tbody>${itemRows}</tbody>
@@ -284,35 +164,21 @@ class NotificationService {
         </tr>
       </tfoot>
     </table>
-
-    ${hasAttachments
-        ? `<div style="background: #e8f5e9; border: 2px dashed #4caf50; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-        <p style="font-size: 17px; margin: 0; color: #2e7d32;">📎 <strong>All your PDFs are attached to this email!</strong></p>
-        <p style="color: #555; font-size: 13px; margin: 8px 0 0;">Save them to your device for offline access anytime.</p>
-      </div>`
-        : `<div style="background: #fff3e0; padding: 15px; border-radius: 8px; border: 1px solid #ffcc80;">
-        <p style="margin: 0; color: #e65c00;">⚠️ PDFs couldn't be attached directly — use the download links in the table above.</p>
-      </div>`
-    }
-
     <p style="color: #888; font-size: 13px; margin-top: 24px;">Questions? Just reply to this email.</p>
     <p style="color: #6c3fc5; font-weight: bold;">Happy reading! 📖✨<br>— The KidsStories Team</p>
   </div>
 </div>`;
 
             const transporter = this.getTransporter();
-            const mailOptions = {
+            const result = await transporter.sendMail({
                 from: `"KidsStories Store" <${process.env.EMAIL_USER}>`,
                 to: userData.email,
                 subject: `🎉 Your KidsStories Order #${uniqueId} is Confirmed!`,
                 html: emailHtml,
-                text: `Hi ${userData.name},\n\nOrder #${uniqueId} confirmed! Total: ₹${total}\n\n${hasAttachments ? 'All PDFs are attached to this email!' : 'Use the download links in the HTML version of this email.'}\n\nHappy reading!\n— KidsStories Team`,
-                attachments: allAttachments
-            };
+                text: `Hi ${userData.name},\n\nOrder #${uniqueId} confirmed! Total: ₹${total}\n\nDownload links for each book:\n${cart.map(i => `${i.name}: ${i.pdfUrl || 'fallback'}`).join('\n')}\n\nHappy reading!\n— KidsStories Team`
+            });
 
-            const result = await this.sendMailWithRetry(transporter, mailOptions);
-            console.log(`✅ Cart email sent to ${userData.email} | MessageID: ${result.messageId} | PDFs attached: ${allAttachments.length}`);
-
+            console.log(`✅ Cart email sent to ${userData.email} | MessageID: ${result.messageId}`);
         } catch (error) {
             console.error('❌ sendCartNotification FAILED:', error.message);
             console.error(error.stack);
