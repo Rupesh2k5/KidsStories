@@ -1,7 +1,15 @@
 import imageKit from "../configs/imagekit.js";
 import user from "../models/user.js"
 import Book from "../models/book.js"
-import fs from 'fs'
+import jwt from 'jsonwebtoken';
+
+const ensureHttps = (url) => {
+    if (!url) return url;
+    if (url.startsWith('http://')) return url.replace('http://', 'https://');
+    return url;
+};
+
+import fs from 'fs';
 import order from "../models/Orders.js";
 
 
@@ -72,10 +80,10 @@ export const getOwnerCars=async(req,res)=>{
         let books = await Book.find({owner:_id}).lean()
         const orders = await order.find({owner:_id, status: { $in: ['pending', 'confirmed'] }})
 
-        // Sanitize localhost URLs
+        // Sanitize URLs to fix Mixed Content
         books = books.map(b => {
-            if (b.image && b.image.includes('localhost')) b.image = '';
-            if (b.pdfUrl && b.pdfUrl.includes('localhost')) b.pdfUrl = '';
+            if (b.image) b.image = ensureHttps(b.image);
+            if (b.pdfUrl) b.pdfUrl = ensureHttps(b.pdfUrl);
             return b;
         });
 
@@ -190,17 +198,17 @@ export const getDashboardData=async(req,res)=>{
         let books=await Book.find({owner:_id}).lean()
         let orders=await order.find({owner:_id}).populate('book').sort({createdAt:-1}).lean()
         
-        // Sanitize localhost
+        // Sanitize URLs to fix Mixed Content
         books = books.map(b => {
-            if (b.image && b.image.includes('localhost')) b.image = '';
-            if (b.pdfUrl && b.pdfUrl.includes('localhost')) b.pdfUrl = '';
+            if (b.image) b.image = ensureHttps(b.image);
+            if (b.pdfUrl) b.pdfUrl = ensureHttps(b.pdfUrl);
             return b;
         });
 
         orders = orders.map(o => {
             if (o.book) {
-                if (o.book.image && o.book.image.includes('localhost')) o.book.image = '';
-                if (o.book.pdfUrl && o.book.pdfUrl.includes('localhost')) o.book.pdfUrl = '';
+                if (o.book.image) o.book.image = ensureHttps(o.book.image);
+                if (o.book.pdfUrl) o.book.pdfUrl = ensureHttps(o.book.pdfUrl);
             }
             return o;
         });

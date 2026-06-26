@@ -4,6 +4,11 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import NotificationService from '../services/notificationService.js';
 
+const ensureHttps = (url) => {
+    if (!url) return url;
+    if (url.startsWith('http://')) return url.replace('http://', 'https://');
+    return url;
+};
 const checkAvailability = async (book, pickupDate, returnDate) => {
     const orders = await order.find({
         book,
@@ -41,8 +46,8 @@ export const checkAvailabilityofCar = async (req, res) => {
         availableCars = availableCars.filter(indi => indi.isAvailable === true);
 
         availableCars = availableCars.map(b => {
-            if (b.image && b.image.includes('localhost')) b.image = '';
-            if (b.pdfUrl && b.pdfUrl.includes('localhost')) b.pdfUrl = '';
+            if (b.image) b.image = ensureHttps(b.image);
+            if (b.pdfUrl) b.pdfUrl = ensureHttps(b.pdfUrl);
             return b;
         });
 
@@ -57,8 +62,8 @@ export const getAvailableBooks = async (req, res) => {
     try {
         let books = await book.find({ isAvailable: true }).lean();
         books = books.map(b => {
-            if (b.image && b.image.includes('localhost')) b.image = '';
-            if (b.pdfUrl && b.pdfUrl.includes('localhost')) b.pdfUrl = '';
+            if (b.image) b.image = ensureHttps(b.image);
+            if (b.pdfUrl) b.pdfUrl = ensureHttps(b.pdfUrl);
             return b;
         });
         res.json({ success: true, books });
@@ -263,8 +268,8 @@ export const getUserOrders = async (req, res) => {
         let orders = await order.find({ user: _id }).populate("book").sort({ createdAt: -1 }).lean();
         orders = orders.map(o => {
             if (o.book) {
-                if (o.book.image && o.book.image.includes('localhost')) o.book.image = '';
-                if (o.book.pdfUrl && o.book.pdfUrl.includes('localhost')) o.book.pdfUrl = '';
+                if (o.book.image) o.book.image = ensureHttps(o.book.image);
+                if (o.book.pdfUrl) o.book.pdfUrl = ensureHttps(o.book.pdfUrl);
             }
             return o;
         });
@@ -287,8 +292,8 @@ export const getOwnerOrders = async (req, res) => {
             .lean();
         orders = orders.map(o => {
             if (o.book) {
-                if (o.book.image && o.book.image.includes('localhost')) o.book.image = '';
-                if (o.book.pdfUrl && o.book.pdfUrl.includes('localhost')) o.book.pdfUrl = '';
+                if (o.book.image) o.book.image = ensureHttps(o.book.image);
+                if (o.book.pdfUrl) o.book.pdfUrl = ensureHttps(o.book.pdfUrl);
             }
             return o;
         });

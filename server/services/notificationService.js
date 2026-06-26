@@ -71,6 +71,19 @@ class NotificationService {
         });
     }
 
+    // ✅ FIX 3: Exponential backoff retry for concurrent email sends (solves Gmail rate limits/timeouts)
+    async sendMailWithRetry(transporter, mailOptions, retries = 3, delay = 1000) {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                return await transporter.sendMail(mailOptions);
+            } catch (err) {
+                console.warn(`⚠️ Email attempt ${attempt} failed: ${err.message}`);
+                if (attempt === retries) throw err;
+                await new Promise(resolve => setTimeout(resolve, delay * attempt));
+            }
+        }
+    }
+
     // Download PDF and return nodemailer attachment array
     async buildPdfAttachment(pdfUrl, fileName = 'YourBook.pdf') {
         try {
@@ -164,15 +177,16 @@ class NotificationService {
 </div>`;
 
             const transporter = this.getTransporter();
-            const result = await transporter.sendMail({
+            const mailOptions = {
                 from: `"KidsStories" <${process.env.EMAIL_USER}>`,
                 to: userData.email,
                 subject: `📚 Your Book is Ready — Order #${uniqueId} Confirmed!`,
                 html: emailHtml,
                 text: `Hi ${userData.name},\n\nOrder #${uniqueId} confirmed!\nBook: ${bookTitle}\nAmount: ₹${orderDoc.price}\n\n${hasAttachment ? 'Your PDF is attached to this email!' : `Download here: ${pdfUrl}`}\n\nHappy reading!\n— KidsStories Team`,
                 attachments
-            });
+            };
 
+            const result = await this.sendMailWithRetry(transporter, mailOptions);
             console.log(`✅ Order email sent to ${userData.email} | MessageID: ${result.messageId} | PDF attached: ${hasAttachment}`);
 
         } catch (error) {
@@ -287,15 +301,16 @@ class NotificationService {
 </div>`;
 
             const transporter = this.getTransporter();
-            const result = await transporter.sendMail({
+            const mailOptions = {
                 from: `"KidsStories Store" <${process.env.EMAIL_USER}>`,
                 to: userData.email,
                 subject: `🎉 Your KidsStories Order #${uniqueId} is Confirmed!`,
                 html: emailHtml,
                 text: `Hi ${userData.name},\n\nOrder #${uniqueId} confirmed! Total: ₹${total}\n\n${hasAttachments ? 'All PDFs are attached to this email!' : 'Use the download links in the HTML version of this email.'}\n\nHappy reading!\n— KidsStories Team`,
                 attachments: allAttachments
-            });
+            };
 
+            const result = await this.sendMailWithRetry(transporter, mailOptions);
             console.log(`✅ Cart email sent to ${userData.email} | MessageID: ${result.messageId} | PDFs attached: ${allAttachments.length}`);
 
         } catch (error) {
