@@ -315,7 +315,7 @@ const Admin = () => {
                       ) : dashboardData.recentOrders.map(order => (
                         <tr key={order._id}>
                           <td><code>#{order._id.substring(0, 8)}</code></td>
-                          <td>{order.user ? order.user.substring(0, 8) : 'Guest'}</td>
+                          <td>{order.user ? order.user.name || order.user.email || 'Guest' : 'Guest'}</td>
                           <td>{order.book ? order.book.brand : 'Book'}</td>
                           <td>₹{order.price}</td>
                           <td><span className={`pill ${order.status === 'confirmed' ? 'pill-green' : 'pill-amber'}`}>{order.status}</span></td>
