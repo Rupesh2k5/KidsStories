@@ -7,6 +7,7 @@ import './AdminPanel.css'; // New CSS file for the Admin Dashboard
 const Admin = () => {
   const { user } = useContext(AppContext);
   const [activeTab, setActiveTab] = useState('home');
+  const [analyticsTab, setAnalyticsTab] = useState('overview');
   const [dashboardData, setDashboardData] = useState(null);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -374,17 +375,308 @@ const Admin = () => {
             </div>
           )}
 
-          {/* STATIC PLACEHOLDER PAGES */}
-          {['customers', 'meta-ads', 'email-mktg', 'seo', 'analytics', 'liveview', 'discounts', 'settings'].includes(activeTab) && (
-            <div className="page active">
-              <div className="page-title">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('-', ' ')}</div>
-              <div className="page-sub">This section is currently in development (Static Demo).</div>
-              <div className="card">
-                <p style={{fontSize: '14px', color: 'var(--text-secondary)'}}>This page is part of the new Admin Dashboard template but has not been connected to a backend API yet. It will be implemented in future updates.</p>
-              </div>
-            </div>
-          )}
+          {/* STATIC PLACEHOLDER PAGES REPLACED */}
+{/*  ========== CUSTOMERS ==========  */}
+      {activeTab === 'customers' && (
+<div className="page active">
+        <div className="page-title">Customers</div>
+        <div className="page-sub">Your registered buyers and their activity</div>
+        <div className="stats-grid">
+          <div className="stat-card"><div className="stat-label">Total customers</div><div className="stat-value">284</div></div>
+          <div className="stat-card"><div className="stat-label">New this month</div><div className="stat-value">38</div><div className="stat-delta delta-up">+22%</div></div>
+          <div className="stat-card"><div className="stat-label">Repeat buyers</div><div className="stat-value">96</div><div className="stat-delta">34%</div></div>
+        </div>
+        <div className="card" style={{ padding: '0' }}>
+          <table className="table">
+            <thead><tr><th>Name</th><th>Email</th><th>Orders</th><th>Total spent</th><th>Last order</th></tr></thead>
+            <tbody>
+              <tr><td>Priya S.</td><td>priya@gmail.com</td><td>4</td><td>₹796</td><td>Today</td></tr>
+              <tr><td>Arjun M.</td><td>arjun@gmail.com</td><td>2</td><td>₹549</td><td>Today</td></tr>
+              <tr><td>Neha R.</td><td>neha@gmail.com</td><td>1</td><td>₹199</td><td>Yesterday</td></tr>
+              <tr><td>Vikram K.</td><td>vikram@gmail.com</td><td>3</td><td>₹598</td><td>2 days ago</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+)}
+{/*  ========== META ADS ==========  */}
+      {activeTab === 'meta-ads' && (
+<div className="page active">
+        <div className="page-title">Meta Ads</div>
+        <div className="page-sub">Run Facebook and Instagram campaigns — no plugin needed</div>
+        <div className="alert-box alert-info"><i className="fas fa-info-circle" style={{ fontSize: '16px', flexShrink: '0', marginTop: '1px' }}></i><div>Connect your Meta Business account once and manage all campaigns from here. Your product catalog syncs automatically.</div></div>
 
+        <div className="stats-grid">
+          <div className="stat-card"><div className="stat-label">Reach this week</div><div className="stat-value">14.2K</div><div className="stat-delta delta-up">+8% vs last week</div></div>
+          <div className="stat-card"><div className="stat-label">Clicks</div><div className="stat-value">832</div><div className="stat-delta delta-up">+22%</div></div>
+          <div className="stat-card"><div className="stat-label">Spend</div><div className="stat-value">₹1,200</div><div className="stat-delta" style={{ color: 'var(--text-muted)' }}>Budget: ₹2,000</div></div>
+          <div className="stat-card"><div className="stat-label">ROAS</div><div className="stat-value">3.6×</div><div className="stat-delta delta-up">Good</div></div>
+        </div>
+
+        <div className="two-col">
+          <div className="card">
+            <div className="card-header"><span className="card-title">Active campaigns</span><button className="btn btn-sm btn-primary" onClick={() => alert('Demo feature')}><i className="fas fa-plus"></i> New campaign</button></div>
+            <div className="metric-row">
+              <div><div style={{ fontSize: '13px', fontWeight: '500' }}>Kids Books — Awareness</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Facebook · Instagram · ₹500/day</div></div>
+              <span className="pill pill-green">Live</span>
+            </div>
+            <div className="metric-row">
+              <div><div style={{ fontSize: '13px', fontWeight: '500' }}>Combo Offer — Retarget</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Instagram · ₹300/day</div></div>
+              <span className="pill pill-green">Live</span>
+            </div>
+            <div className="metric-row">
+              <div><div style={{ fontSize: '13px', fontWeight: '500' }}>Summer Reading — Conversion</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Facebook · ₹400/day</div></div>
+              <span className="pill pill-amber">Paused</span>
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-header"><span className="card-title">Create new campaign</span></div>
+            <div className="form-row"><label className="form-label">Campaign objective</label>
+              <select className="form-input"><option>Sales (conversions)</option><option>Traffic</option><option>Brand awareness</option><option>Lead generation</option></select></div>
+            <div className="form-row"><label className="form-label">Target audience</label>
+              <select className="form-input"><option>Parents with children (3-10 yrs)</option><option>Book enthusiasts India</option><option>Custom audience</option></select></div>
+            <div className="two-col" style={{ gap: '10px' }}>
+              <div className="form-row"><label className="form-label">Daily budget (₹)</label><input className="form-input" type="number" value="500" placeholder="500" /></div>
+              <div className="form-row"><label className="form-label">Duration (days)</label><input className="form-input" type="number" value="7" placeholder="7" /></div>
+            </div>
+            <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => alert('Demo feature')}><i className="fas fa-rocket"></i> Launch campaign</button>
+          </div>
+        </div>
+      </div>
+)}
+{/*  ========== EMAIL CAMPAIGNS ==========  */}
+      {activeTab === 'email-mktg' && (
+<div className="page active">
+        <div className="page-title">Email campaigns</div>
+        <div className="page-sub">Send order confirmations, promotions, and re-engagement emails</div>
+        <div className="two-col">
+          <div className="card">
+            <div className="card-header"><span className="card-title">Campaign performance</span></div>
+            <div className="metric-row"><span style={{ fontSize: '13px' }}>Emails sent</span><span style={{ fontWeight: '500' }}>1,284</span></div>
+            <div className="metric-row"><span style={{ fontSize: '13px' }}>Open rate</span><span style={{ fontWeight: '500', color: 'var(--text-success)' }}>34.2%</span></div>
+            <div className="metric-row"><span style={{ fontSize: '13px' }}>Click rate</span><span style={{ fontWeight: '500' }}>8.7%</span></div>
+            <div className="metric-row"><span style={{ fontSize: '13px' }}>Orders from email</span><span style={{ fontWeight: '500', color: 'var(--text-accent)' }}>₹3,400</span></div>
+          </div>
+          <div className="card">
+            <div className="card-header"><span className="card-title">Automation flows</span><button className="btn btn-sm btn-primary" onClick={() => alert('Demo feature')}><i className="fas fa-plus"></i> Add</button></div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>Order confirmation + PDF</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Sent on every order</div></div>
+              <div className="toggle on" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>Abandoned cart reminder</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>After 2 hours</div></div>
+              <div className="toggle on" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>Re-engagement (30 days)</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Inactive customers</div></div>
+              <div className="toggle" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>New book announcement</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>When product added</div></div>
+              <div className="toggle on" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-header"><span className="card-title">Send a promotional email</span></div>
+          <div className="two-col">
+            <div>
+              <div className="form-row"><label className="form-label">Subject line</label><input className="form-input" type="text" value="Summer reading special — 20% off all books!" /></div>
+              <div className="form-row"><label className="form-label">Audience</label>
+                <select className="form-input"><option>All customers (284)</option><option>Active last 30 days (142)</option><option>Never purchased (56)</option></select></div>
+            </div>
+            <div>
+              <div className="form-row"><label className="form-label">Send time</label>
+                <select className="form-input"><option>Send now</option><option>Schedule for later</option></select></div>
+              <div className="form-row"><label className="form-label">Discount code to include</label><input className="form-input" type="text" placeholder="e.g. SUMMER20" /></div>
+            </div>
+          </div>
+          <button className="btn btn-primary" onClick={() => alert('Demo feature')}><i className="fas fa-send"></i> Send campaign</button>
+        </div>
+      </div>
+)}
+{/*  ========== SEO ==========  */}
+      {activeTab === 'seo' && (
+<div className="page active">
+        <div className="page-title">SEO</div>
+        <div className="page-sub">Search engine visibility — no external plugin needed</div>
+
+        <div className="two-col" style={{ marginBottom: '16px' }}>
+          <div className="card">
+            <div className="card-header">
+              <span className="card-title">Store SEO score</span>
+              <div className="seo-score" style={{ borderColor: '#22c55e', color: '#22c55e' }}><span>72</span><span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>/100</span></div>
+            </div>
+            <div className="alert-box alert-warn"><i className="fas fa-exclamation-triangle" style={{ fontSize: '15px', flexShrink: '0' }}></i> 3 pages missing meta descriptions</div>
+            <div className="alert-box alert-warn"><i className="fas fa-exclamation-triangle" style={{ fontSize: '15px', flexShrink: '0' }}></i> Product images missing alt text</div>
+            <div className="alert-box alert-success"><i className="fas fa-check-circle" style={{ fontSize: '15px', flexShrink: '0' }}></i> Sitemap submitted to Google</div>
+            <div className="alert-box alert-success"><i className="fas fa-check-circle" style={{ fontSize: '15px', flexShrink: '0' }}></i> SSL active — HTTPS enabled</div>
+          </div>
+          <div className="card">
+            <div className="card-header"><span className="card-title">Search performance</span></div>
+            <div className="metric-row"><span style={{ fontSize: '13px' }}>Google impressions (30d)</span><span style={{ fontWeight: '500' }}>8,420</span></div>
+            <div className="metric-row"><span style={{ fontSize: '13px' }}>Clicks from search</span><span style={{ fontWeight: '500', color: 'var(--text-accent)' }}>312</span></div>
+            <div className="metric-row"><span style={{ fontSize: '13px' }}>Average position</span><span style={{ fontWeight: '500' }}>#14.2</span></div>
+            <div className="metric-row"><span style={{ fontSize: '13px' }}>CTR</span><span style={{ fontWeight: '500' }}>3.7%</span></div>
+            <div style={{ marginTop: '12px' }}><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>Top query: "kids activity books india"</div><button className="btn btn-sm" style={{ width: '100%' }} onClick={() => alert('AI Prompt Feature (Demo)')}>Get SEO tips for this ↗</button></div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header"><span className="card-title">Edit page SEO — products</span></div>
+          <div className="form-row"><label className="form-label">Select page</label>
+            <select className="form-input"><option>The Magic Forest (product page)</option><option>Space Explorer (product page)</option><option>Home page</option></select></div>
+          <div className="form-row"><label className="form-label">SEO title (shown in Google results)</label><input className="form-input" type="text" value="The Magic Forest — Kids Story Book | KidsStories India" /></div>
+          <div className="form-row"><label className="form-label">Meta description (max 160 chars)</label>
+            <textarea className="form-input" rows="2" style={{ resize: 'vertical' }}>A magical journey for kids aged 4-8. Download and read The Magic Forest — an enchanting story that sparks imagination. Order today!</textarea></div>
+          <div className="form-row"><label className="form-label">URL handle</label><input className="form-input" type="text" value="products/the-magic-forest" /></div>
+          <div style={{ display: 'flex', gap: '8px' }}><button className="btn btn-primary btn-sm" onClick={() => alert('Demo feature')}><i className="fas fa-check"></i> Save SEO settings</button><button className="btn btn-sm" onClick={() => alert('AI Prompt Feature (Demo)')}>Generate with AI ↗</button></div>
+        </div>
+
+        <div className="card">
+          <div className="card-header"><span className="card-title">Keywords to target</span></div>
+          <table className="table">
+            <thead><tr><th>Keyword</th><th>Monthly searches</th><th>Difficulty</th><th>Your rank</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>kids story books online india</td><td>8,100</td><td><span className="pill pill-amber">Medium</span></td><td>#28</td><td><button className="btn btn-sm" onClick={() => alert('AI Prompt Feature (Demo)')}>Improve ↗</button></td></tr>
+              <tr><td>activity books for kids</td><td>5,400</td><td><span className="pill pill-green">Easy</span></td><td>#12</td><td><button className="btn btn-sm" onClick={() => alert('AI Prompt Feature (Demo)')}>Improve ↗</button></td></tr>
+              <tr><td>children books rent</td><td>1,900</td><td><span className="pill pill-green">Easy</span></td><td>#6</td><td><button className="btn btn-sm">Optimized</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+)}
+{/*  ========== ANALYTICS ==========  */}
+      {activeTab === 'analytics' && (
+<div className="page active">
+        <div className="page-title">Analytics</div>
+        <div className="page-sub">Sales, traffic, and customer insights</div>
+        <div className="tab-bar">
+          <div className={`tab ${analyticsTab === 'overview' ? 'active' : ''}`} onClick={() => setAnalyticsTab('overview')}>Overview</div>
+          <div className={`tab ${analyticsTab === 'traffic' ? 'active' : ''}`} onClick={() => setAnalyticsTab('traffic')}>Traffic sources</div>
+          <div className={`tab ${analyticsTab === 'conversion' ? 'active' : ''}`} onClick={() => setAnalyticsTab('conversion')}>Conversion funnel</div>
+        </div>
+
+        <div style={{ display: analyticsTab === 'overview' ? 'block' : 'none' }} id="analytics-overview">
+          <div className="stats-grid">
+            <div className="stat-card"><div className="stat-label">Revenue (30d)</div><div className="stat-value">₹12,840</div><div className="stat-delta delta-up">+18%</div></div>
+            <div className="stat-card"><div className="stat-label">Orders (30d)</div><div className="stat-value">68</div><div className="stat-delta delta-up">+11%</div></div>
+            <div className="stat-card"><div className="stat-label">Avg order value</div><div className="stat-value">₹238</div><div className="stat-delta delta-up">+6%</div></div>
+            <div className="stat-card"><div className="stat-label">Returning customers</div><div className="stat-value">34%</div><div className="stat-delta delta-up">+4%</div></div>
+          </div>
+          <div className="card">
+            <div className="card-header"><span className="card-title">Revenue — last 7 days</span></div>
+            <div className="chart-placeholder" id="rev-chart"></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 12px 0', fontSize: '11px', color: 'var(--text-muted)' }}>
+              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: analyticsTab === 'traffic' ? 'block' : 'none' }} id="analytics-traffic">
+          <div className="card">
+            <div className="card-header"><span className="card-title">Traffic by source (30d)</span></div>
+            <div className="funnel-row"><div className="funnel-label">Direct</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '45%', background: 'var(--fill-accent)' }}></div></div><div className="funnel-val">880</div><div className="funnel-pct">45%</div></div>
+            <div className="funnel-row"><div className="funnel-label">Google</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '30%', background: '#4285f4' }}></div></div><div className="funnel-val">590</div><div className="funnel-pct">30%</div></div>
+            <div className="funnel-row"><div className="funnel-label">Instagram</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '15%', background: '#e1306c' }}></div></div><div className="funnel-val">295</div><div className="funnel-pct">15%</div></div>
+            <div className="funnel-row"><div className="funnel-label">Facebook</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '7%', background: '#1877f2' }}></div></div><div className="funnel-val">137</div><div className="funnel-pct">7%</div></div>
+            <div className="funnel-row"><div className="funnel-label">WhatsApp</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '3%', background: '#25d366' }}></div></div><div className="funnel-val">58</div><div className="funnel-pct">3%</div></div>
+          </div>
+        </div>
+
+        <div style={{ display: analyticsTab === 'conversion' ? 'block' : 'none' }} id="analytics-conversion">
+          <div className="card">
+            <div className="card-header"><span className="card-title">Conversion funnel</span></div>
+            <div className="funnel-row"><div className="funnel-label">Visitors</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '100%', background: 'var(--fill-accent)' }}></div></div><div className="funnel-val">1,952</div><div className="funnel-pct">100%</div></div>
+            <div className="funnel-row"><div className="funnel-label">Viewed book</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '60%', background: 'var(--fill-accent)' }}></div></div><div className="funnel-val">1,171</div><div className="funnel-pct">60%</div></div>
+            <div className="funnel-row"><div className="funnel-label">Added to cart</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '18%', background: 'var(--fill-warning)' }}></div></div><div className="funnel-val">351</div><div className="funnel-pct">18%</div></div>
+            <div className="funnel-row"><div className="funnel-label">Reached checkout</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '8%', background: 'var(--fill-warning)' }}></div></div><div className="funnel-val">156</div><div className="funnel-pct">8%</div></div>
+            <div className="funnel-row"><div className="funnel-label">Purchased</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '3.5%', background: 'var(--fill-success)' }}></div></div><div className="funnel-val">68</div><div className="funnel-pct">3.5%</div></div>
+          </div>
+          <div style={{ marginTop: '8px' }}><button className="btn" onClick={() => alert('AI Prompt Feature (Demo)')}>Get conversion tips ↗</button></div>
+        </div>
+      </div>
+)}
+{/*  ========== LIVE VIEW ==========  */}
+      {activeTab === 'liveview' && (
+<div className="page active">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          <div className="live-dot"></div>
+          <div className="page-title">Live view</div>
+        </div>
+        <div className="page-sub">Visitors on your store right now</div>
+        <div className="stats-grid">
+          <div className="stat-card"><div className="stat-label">Visitors right now</div><div className="stat-value" id="lv-count">7</div></div>
+          <div className="stat-card"><div className="stat-label">Active carts</div><div className="stat-value">3</div></div>
+          <div className="stat-card"><div className="stat-label">Checking out</div><div className="stat-value">1</div></div>
+          <div className="stat-card"><div className="stat-label">Purchased today</div><div className="stat-value">2</div></div>
+        </div>
+        <div className="card">
+          <div className="card-header"><span className="card-title">Visitors by location</span></div>
+          <div className="funnel-row"><div className="funnel-label">Hyderabad</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '40%', background: 'var(--fill-accent)' }}></div></div><div className="funnel-val">3</div></div>
+          <div className="funnel-row"><div className="funnel-label">Bangalore</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '27%', background: 'var(--fill-accent)' }}></div></div><div className="funnel-val">2</div></div>
+          <div className="funnel-row"><div className="funnel-label">Mumbai</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '13%', background: 'var(--fill-accent)' }}></div></div><div className="funnel-val">1</div></div>
+          <div className="funnel-row"><div className="funnel-label">Chennai</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '13%', background: 'var(--fill-accent)' }}></div></div><div className="funnel-val">1</div></div>
+        </div>
+      </div>
+)}
+{/*  ========== DISCOUNTS ==========  */}
+      {activeTab === 'discounts' && (
+<div className="page active">
+        <div className="page-title">Discounts</div>
+        <div className="page-sub">Create coupon codes and automatic discounts</div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '14px' }}><button className="btn btn-primary btn-sm" onClick={() => alert('Demo feature')}><i className="fas fa-plus"></i> Create discount</button></div>
+        <div className="card" style={{ padding: '0' }}>
+          <table className="table">
+            <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Used</th><th>Expires</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><code>SUMMER20</code></td><td>Percentage</td><td>20% off</td><td>14/50</td><td>Jul 31</td><td><span className="pill pill-green">Active</span></td></tr>
+              <tr><td><code>WELCOME10</code></td><td>Percentage</td><td>10% off</td><td>38/—</td><td>No expiry</td><td><span className="pill pill-green">Active</span></td></tr>
+              <tr><td><code>COMBO100</code></td><td>Fixed amount</td><td>₹100 off</td><td>7/20</td><td>Jun 30</td><td><span className="pill pill-red">Expired</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+)}
+{/*  ========== SETTINGS ==========  */}
+      {activeTab === 'settings' && (
+<div className="page active">
+        <div className="page-title">Settings</div>
+        <div className="page-sub">Store configuration and integrations</div>
+        <div className="two-col">
+          <div className="card">
+            <div className="card-header"><span className="card-title">Store details</span></div>
+            <div className="form-row"><label className="form-label">Store name</label><input className="form-input" type="text" value="KidsStories" /></div>
+            <div className="form-row"><label className="form-label">Store URL</label><input className="form-input" type="text" value="kids-stories-olive.vercel.app" /></div>
+            <div className="form-row"><label className="form-label">Support email</label><input className="form-input" type="text" value="sruthikommalapati1998@gmail.com" /></div>
+            <button className="btn btn-primary btn-sm" onClick={() => alert('Demo feature')}><i className="fas fa-check"></i> Save</button>
+          </div>
+          <div className="card">
+            <div className="card-header"><span className="card-title">Integrations</span></div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>Razorpay payments</div><div style={{ fontSize: '12px', color: 'var(--text-success)' }}>Connected</div></div>
+              <div className="toggle on" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>Email notifications (Gmail)</div><div style={{ fontSize: '12px', color: 'var(--text-success)' }}>Connected</div></div>
+              <div className="toggle on" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>Meta Ads (Facebook/Instagram)</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Not connected</div></div>
+              <div className="toggle" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>Google Search Console</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Not connected</div></div>
+              <div className="toggle" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+            <div className="setting-row">
+              <div><div style={{ fontSize: '13px' }}>WhatsApp notifications</div><div style={{ fontSize: '12px', color: 'var(--text-success)' }}>Connected (Twilio)</div></div>
+              <div className="toggle on" onClick={(e) => e.currentTarget.classList.toggle('on')}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      )}
         </div>
       </div>
     </div>
