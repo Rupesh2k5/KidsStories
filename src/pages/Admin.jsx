@@ -1,17 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppContext, backendUrl } from '../context/AppContext';
+import { Settings, BookOpen, Activity, Calendar, DollarSign, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import './AdminPanel.css'; // New CSS file for the Admin Dashboard
 
 const Admin = () => {
   const { user } = useContext(AppContext);
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('overview');
   const [dashboardData, setDashboardData] = useState(null);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +20,7 @@ const Admin = () => {
       return;
     }
     fetchData();
-  }, [user, navigate]);
+  }, [user]);
 
   const fetchData = async () => {
     try {
@@ -105,6 +104,7 @@ const Admin = () => {
       const data = await res.json();
       if (data.success) {
         toast.success(data.message, { id: toastId });
+        // Optionally update local state if needed, though PDF isn't displayed
       } else {
         toast.error(data.message, { id: toastId });
       }
@@ -162,8 +162,8 @@ const Admin = () => {
       if (data.success) {
         toast.success("Book Added Successfully!");
         e.target.reset();
-        fetchData();
-        setShowAddForm(false);
+        fetchData(); // Refresh list
+        setActiveTab('books');
       } else {
         toast.error(data.message || "Failed to add book");
       }
@@ -171,217 +171,163 @@ const Admin = () => {
       toast.error("An error occurred");
     } finally {
       setSubmitting(false);
-      toast.dismiss();
+      toast.dismiss(); // Clear any loading toasts
     }
   };
 
-  if (loading || !dashboardData) {
-    return <div style={{ padding: '40px', textAlign: 'center' }}>Loading Admin Dashboard...</div>;
-  }
-
-  // Live visitor logic simulation
-  const visitorCount = Math.floor(Math.random() * 5) + 3;
+  if (loading || !dashboardData) return <div className="container" style={{ paddingTop: '120px' }}>Loading Admin Dashboard...</div>;
 
   return (
-    <div className="shell">
-      {/* SIDEBAR */}
-      <aside className="sidebar">
-        <div className="logo">
-          <div className="logo-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          </div>
-          <div>
-            <div className="logo-text">KidsStories</div>
-            <div className="logo-sub">Admin Panel</div>
-          </div>
-        </div>
-        <nav>
-          <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}><i className="fas fa-home"></i> <span>Home</span></div>
-          <div className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}><i className="fas fa-shopping-cart"></i> <span>Orders</span> <span className="badge">{dashboardData.totalOrders}</span></div>
-          <div className={`nav-item ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}><i className="fas fa-book"></i> <span>Products</span></div>
-          <div className={`nav-item ${activeTab === 'customers' ? 'active' : ''}`} onClick={() => setActiveTab('customers')}><i className="fas fa-users"></i> <span>Customers</span></div>
-
-          <div className="nav-section">Marketing</div>
-          <div className={`nav-item ${activeTab === 'meta-ads' ? 'active' : ''}`} onClick={() => setActiveTab('meta-ads')}><i className="fab fa-meta"></i> <span>Meta Ads</span></div>
-          <div className={`nav-item ${activeTab === 'email-mktg' ? 'active' : ''}`} onClick={() => setActiveTab('email-mktg')}><i className="fas fa-envelope"></i> <span>Email campaigns</span></div>
-
-          <div className="nav-section">Growth</div>
-          <div className={`nav-item ${activeTab === 'seo' ? 'active' : ''}`} onClick={() => setActiveTab('seo')}><i className="fas fa-search"></i> <span>SEO</span></div>
-          <div className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}><i className="fas fa-chart-bar"></i> <span>Analytics</span></div>
-          <div className={`nav-item ${activeTab === 'liveview' ? 'active' : ''}`} onClick={() => setActiveTab('liveview')}><i className="fas fa-eye"></i> <span>Live view</span></div>
-
-          <div className="nav-section">Store</div>
-          <div className={`nav-item ${activeTab === 'discounts' ? 'active' : ''}`} onClick={() => setActiveTab('discounts')}><i className="fas fa-tag"></i> <span>Discounts</span></div>
-          <div className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}><i className="fas fa-cog"></i> <span>Settings</span></div>
-        </nav>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <div className="main">
-        <div className="topbar">
-          <div className="search-box"><i className="fas fa-search"></i> Search orders, products, customers… <span style={{marginLeft: 'auto', fontSize: '11px', background: 'var(--surface-0)', border: '0.5px solid var(--border)', padding: '2px 6px', borderRadius: '4px'}}>Ctrl K</span></div>
-          <div className="topbar-right">
-            <button className="btn btn-sm"><i className="fas fa-bell"></i></button>
-            <div className="avatar">A</div>
-          </div>
-        </div>
-
-        <div className="content">
-          
-          {/* ========== HOME ========== */}
-          {activeTab === 'home' && (
-            <div className="page active">
-              <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px'}}>
-                <div className="live-dot"></div>
-                <div className="page-title">Live view</div>
-                <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>Just now</span>
-              </div>
-              <div className="page-sub">Real-time snapshot of your store</div>
-              
-              <div className="stats-grid">
-                <div className="stat-card"><div className="stat-label">Visitors right now</div><div className="stat-value">{visitorCount}</div></div>
-                <div className="stat-card"><div className="stat-label">Total Revenue</div><div className="stat-value">₹{dashboardData.monthlyRevenue}</div><div className="stat-delta delta-up"><i className="fas fa-arrow-up" style={{fontSize: '11px'}}></i> Real-time</div></div>
-                <div className="stat-card"><div className="stat-label">Total Orders</div><div className="stat-value">{dashboardData.totalOrders}</div><div className="stat-delta delta-up"><i className="fas fa-arrow-up" style={{fontSize: '11px'}}></i> Lifetime</div></div>
-                <div className="stat-card"><div className="stat-label">Weekend Bookings</div><div className="stat-value">{dashboardData.weekendOrders}</div></div>
-              </div>
-              
-              <div className="two-col">
-                <div className="card">
-                  <div className="card-header"><span className="card-title">Customer behavior (Demo)</span></div>
-                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Active carts</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '30%', background: 'var(--fill-accent)'}}></div></div><div className="funnel-val">3</div></div>
-                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Checking out</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '15%', background: 'var(--fill-warning)'}}></div></div><div className="funnel-val">1</div></div>
-                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Purchased</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '20%', background: 'var(--fill-success)'}}></div></div><div className="funnel-val">{dashboardData.completedOrders}</div></div>
-                </div>
-                <div className="card">
-                  <div className="card-header"><span className="card-title">Recent orders</span></div>
-                  {dashboardData.recentOrders.length === 0 ? <p style={{fontSize: '13px', color: 'var(--text-muted)'}}>No recent orders.</p> : dashboardData.recentOrders.map(order => (
-                    <div className="metric-row" key={order._id} style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
-                      <span style={{fontSize: '13px'}}>{order.book?.brand || 'Unknown'} - ₹{order.price}</span>
-                      <span className={`pill ${order.status === 'confirmed' ? 'pill-green' : 'pill-amber'}`}>{order.status}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========== ORDERS ========== */}
-          {activeTab === 'orders' && (
-            <div className="page active">
-              <div className="page-title">Orders</div>
-              <div className="page-sub">Manage customer orders and fulfillment</div>
-              <div className="card" style={{padding: 0}}>
-                <div style={{padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '0.5px solid var(--border)'}}>
-                  <button className="btn btn-sm">All <span className="badge" style={{background: 'var(--surface-0)', color: 'var(--text-primary)', border: '0.5px solid var(--border)'}}>{dashboardData.totalOrders}</span></button>
-                  <button className="btn btn-sm">Pending <span className="badge">{dashboardData.pendingOrders}</span></button>
-                  <button className="btn btn-sm">Confirmed <span className="badge" style={{background: 'var(--fill-success)'}}>{dashboardData.completedOrders}</span></button>
-                </div>
-                <div style={{overflowX: 'auto'}}>
-                  <table className="table">
-                    <thead><tr><th>Order ID</th><th>Customer ID</th><th>Product</th><th>Amount</th><th>Status</th></tr></thead>
-                    <tbody>
-                      {dashboardData.recentOrders.length === 0 ? (
-                        <tr><td colSpan="5" style={{textAlign: 'center', padding: '20px'}}>No orders found</td></tr>
-                      ) : dashboardData.recentOrders.map(order => (
-                        <tr key={order._id}>
-                          <td><code>#{order._id.substring(0, 8)}</code></td>
-                          <td>{order.user ? order.user.substring(0, 8) : 'Guest'}</td>
-                          <td>{order.book ? order.book.brand : 'Book'}</td>
-                          <td>₹{order.price}</td>
-                          <td><span className={`pill ${order.status === 'confirmed' ? 'pill-green' : 'pill-amber'}`}>{order.status}</span></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========== PRODUCTS ========== */}
-          {activeTab === 'products' && (
-            <div className="page active">
-              <div className="page-title">Products</div>
-              <div className="page-sub">Books and bundles in your store</div>
-              
-              <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: '14px'}}>
-                <button className="btn btn-primary btn-sm" onClick={() => setShowAddForm(!showAddForm)}>
-                  <i className={`fas ${showAddForm ? 'fa-times' : 'fa-plus'}`}></i> {showAddForm ? 'Cancel' : 'Add product'}
-                </button>
-              </div>
-
-              {showAddForm && (
-                <div className="card" style={{marginBottom: '20px'}}>
-                  <div className="card-header"><span className="card-title">Add New Product</span></div>
-                  <form onSubmit={handleAddBook} style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-                    <div className="form-row"><label className="form-label">Book Title</label><input className="form-input" name="brand" required placeholder="e.g. The Magic Forest" /></div>
-                    <div className="form-row"><label className="form-label">Type / Format</label>
-                      <select className="form-input" name="model" required>
-                        <option value="Single Book">Single Book</option>
-                        <option value="Bundle">Bundle (Multiple Books)</option>
-                        <option value="E-Book">E-Book Only</option>
-                      </select>
-                    </div>
-                    <div className="form-row"><label className="form-label">Price (₹)</label><input className="form-input" type="number" name="pricePerDay" required placeholder="199" min="0" /></div>
-                    <div className="form-row"><label className="form-label">Description</label><textarea className="form-input" name="description" required rows="3" placeholder="A magical journey..."></textarea></div>
-                    <div className="two-col">
-                      <div className="form-row"><label className="form-label">Cover Image</label><input className="form-input" type="file" name="image" required accept="image/*" /></div>
-                      <div className="form-row"><label className="form-label">PDF Content</label><input className="form-input" type="file" name="pdf" required accept=".pdf" /></div>
-                    </div>
-                    <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Uploading...' : 'Publish Book'}</button>
-                  </form>
-                </div>
-              )}
-
-              <div className="card" style={{padding: 0}}>
-                <div style={{overflowX: 'auto'}}>
-                  <table className="table">
-                    <thead><tr><th>Cover</th><th>Title</th><th>Type</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody>
-                      {books.length === 0 ? <tr><td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>No products yet</td></tr> : books.map(book => (
-                        <tr key={book._id}>
-                          <td><img src={book.image} alt="cover" style={{width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px'}} /></td>
-                          <td><b>{book.brand}</b></td>
-                          <td>{book.model}</td>
-                          <td>₹{book.pricePerDay}</td>
-                          <td><span className={`pill ${book.isAvailable ? 'pill-green' : 'pill-gray'}`}>{book.isAvailable ? 'Active' : 'Disabled'}</span></td>
-                          <td>
-                            <div style={{display: 'flex', gap: '6px'}}>
-                              <button className="btn btn-sm" onClick={() => toggleAvailability(book._id)}>{book.isAvailable ? 'Disable' : 'Enable'}</button>
-                              
-                              <label className="btn btn-sm" style={{cursor: 'pointer'}}>
-                                Cover <input type="file" accept="image/*" style={{display: 'none'}} onChange={(e) => handleUpdateCover(book._id, e.target.files[0])} />
-                              </label>
-
-                              <label className="btn btn-sm" style={{cursor: 'pointer'}}>
-                                PDF <input type="file" accept=".pdf" style={{display: 'none'}} onChange={(e) => handleUpdatePdf(book._id, e.target.files[0])} />
-                              </label>
-
-                              <button className="btn btn-sm" style={{color: 'var(--text-danger)'}} onClick={() => handleDeleteBook(book._id)}><i className="fas fa-trash"></i></button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STATIC PLACEHOLDER PAGES */}
-          {['customers', 'meta-ads', 'email-mktg', 'seo', 'analytics', 'liveview', 'discounts', 'settings'].includes(activeTab) && (
-            <div className="page active">
-              <div className="page-title">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('-', ' ')}</div>
-              <div className="page-sub">This section is currently in development (Static Demo).</div>
-              <div className="card">
-                <p style={{fontSize: '14px', color: 'var(--text-secondary)'}}>This page is part of the new Admin Dashboard template but has not been connected to a backend API yet. It will be implemented in future updates.</p>
-              </div>
-            </div>
-          )}
-
-        </div>
+    <div className="container" style={{ minHeight: '80vh', paddingTop: '120px', paddingBottom: '60px' }}>
+      <h2 className="text-gradient mb-4" style={{ fontSize: '2.5rem', textAlign: 'center' }}>Admin Dashboard</h2>
+      
+      <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <button className={`btn ${activeTab === 'overview' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: '1 1 120px', fontSize: '1rem', padding: '10px' }} onClick={() => setActiveTab('overview')}>Overview</button>
+        <button className={`btn ${activeTab === 'books' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: '1 1 120px', fontSize: '1rem', padding: '10px' }} onClick={() => setActiveTab('books')}>Manage Books</button>
+        <button className={`btn ${activeTab === 'add' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: '1 1 120px', fontSize: '1rem', padding: '10px' }} onClick={() => setActiveTab('add')}>+ Add New Book</button>
       </div>
+
+      {activeTab === 'overview' && (
+        <div style={{ display: 'grid', gap: '30px' }}>
+          
+          <div className="admin-cards-grid">
+            <div className="glass-panel admin-card">
+              <Package size={40} color="var(--primary)" />
+              <div>
+                <h3 style={{ margin: 0, fontSize: '2rem' }}>{dashboardData.totalOrders}</h3>
+                <p style={{ margin: 0, color: '#666' }}>Total Bookings</p>
+              </div>
+            </div>
+            
+            <div className="glass-panel admin-card">
+              <Calendar size={40} color="var(--secondary)" />
+              <div>
+                <h3 style={{ margin: 0, fontSize: '2rem' }}>{dashboardData.weekendOrders}</h3>
+                <p style={{ margin: 0, color: '#666' }}>Weekend Bookings</p>
+              </div>
+            </div>
+
+            <div className="glass-panel admin-card">
+              <DollarSign size={40} color="var(--success)" />
+              <div>
+                <h3 style={{ margin: 0, fontSize: '2rem' }}>₹{dashboardData.monthlyRevenue}</h3>
+                <p style={{ margin: 0, color: '#666' }}>Total Earned</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-panel admin-panel">
+            <h3 style={{ marginBottom: '20px' }}>Recent Bookings</h3>
+            {dashboardData.recentOrders.length === 0 ? <p>No recent bookings.</p> : (
+              <div className="table-responsive">
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
+                      <th style={{ padding: '10px' }}>Order ID</th>
+                      <th style={{ padding: '10px' }}>Book</th>
+                      <th style={{ padding: '10px' }}>Amount</th>
+                      <th style={{ padding: '10px' }}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dashboardData.recentOrders.map(order => (
+                      <tr key={order._id} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '10px' }}>{order._id.substring(0, 8)}...</td>
+                        <td style={{ padding: '10px' }}>{order.book ? order.book.brand : 'Book'}</td>
+                        <td style={{ padding: '10px' }}>₹{order.price}</td>
+                        <td style={{ padding: '10px' }}><span style={{ padding: '3px 8px', borderRadius: '12px', background: order.status === 'confirmed' ? 'var(--success)' : '#ffb703', color: 'white', fontSize: '0.8rem' }}>{order.status}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
+
+      {activeTab === 'books' && (
+        <div className="glass-panel" style={{ padding: '30px' }}>
+          <h3 style={{ marginBottom: '20px' }}>Enable/Disable Books</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+            {books.length === 0 ? <p>No books added yet.</p> : books.map(book => (
+              <div key={book._id} style={{ border: '1px solid #eee', borderRadius: '10px', padding: '15px', display: 'flex', gap: '15px', alignItems: 'center' }}>
+                <img src={book.image} alt="book" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ margin: '0 0 5px 0' }}>{book.brand} {book.model}</h4>
+                  <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#666' }}>₹{book.pricePerDay}</p>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button 
+                      onClick={() => toggleAvailability(book._id)}
+                      style={{ padding: '5px 10px', borderRadius: '5px', border: 'none', cursor: 'pointer', background: book.isAvailable ? 'var(--success)' : '#ccc', color: book.isAvailable ? 'white' : '#333' }}
+                    >
+                      {book.isAvailable ? 'Active' : 'Disabled'}
+                    </button>
+                    
+                    <label style={{ padding: '5px 10px', borderRadius: '5px', background: 'var(--primary)', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}>
+                      Change Cover
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleUpdateCover(book._id, e.target.files[0])} />
+                    </label>
+
+                    <label style={{ padding: '5px 10px', borderRadius: '5px', background: 'var(--secondary)', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}>
+                      Change PDF
+                      <input type="file" accept=".pdf" style={{ display: 'none' }} onChange={(e) => handleUpdatePdf(book._id, e.target.files[0])} />
+                    </label>
+
+                    <button 
+                      onClick={() => handleDeleteBook(book._id)}
+                      style={{ padding: '5px 10px', borderRadius: '5px', border: 'none', cursor: 'pointer', background: '#ff4d4d', color: 'white' }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'add' && (
+        <div className="glass-panel" style={{ padding: '30px', maxWidth: '600px', margin: '0 auto' }}>
+          <h3 style={{ marginBottom: '20px' }}>Upload a New Book</h3>
+          <form onSubmit={handleAddBook} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div className="form-group">
+              <label>Book Title</label>
+              <input type="text" name="brand" required placeholder="e.g. The Magic Forest" />
+            </div>
+            <div className="form-group">
+              <label>Type / Format</label>
+              <select name="model" required style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '2px solid #ddd' }}>
+                <option value="Single Book">Single Book</option>
+                <option value="Bundle">Bundle (Multiple Books)</option>
+                <option value="E-Book">E-Book Only</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Price (₹)</label>
+              <input type="number" name="pricePerDay" required placeholder="199" min="0" />
+            </div>
+            <div className="form-group">
+              <label>Description</label>
+              <textarea name="description" required rows="3" placeholder="A magical journey..." style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '2px solid #ddd' }}></textarea>
+            </div>
+            <div className="form-group">
+              <label>Book Cover Image</label>
+              <input type="file" name="image" required accept="image/*" style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '2px solid #ddd', background: 'white' }} />
+            </div>
+            <div className="form-group">
+              <label>Book Content (PDF)</label>
+              <input type="file" name="pdf" required accept=".pdf" style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '2px solid #ddd', background: 'white' }} />
+            </div>
+            <button type="submit" className="btn btn-primary" disabled={submitting} style={{ marginTop: '10px' }}>
+              {submitting ? 'Uploading...' : 'Publish Book'}
+            </button>
+          </form>
+        </div>
+      )}
+
     </div>
   );
 };
