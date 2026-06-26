@@ -141,14 +141,10 @@ export const verifyAndCreateOrder = async (req, res) => {
 
         await newOrder.save();
 
-        // ✅ FIX: AWAIT the notification BEFORE sending res.json.
-        // Vercel freezes the Lambda the moment res is sent — fire-and-forget dies silently.
-        try {
-            await NotificationService.sendOrderNotifications(newOrder._id);
-        } catch (emailErr) {
-            // Don't let email failure break the order success response
-            console.error("Email notification error:", emailErr.message);
-        }
+        // Fire-and-forget email sending
+        NotificationService.sendOrderNotifications(newOrder._id)
+            .then(() => console.log('✅ Email sent'))
+            .catch(err => console.error('❌ Email error:', err));
 
         res.json({ success: true, message: 'Order Created and Payment Verified' });
 
@@ -209,12 +205,10 @@ export const verifyCartOrder = async (req, res) => {
             await newOrder.save();
         }
 
-        // ✅ FIX: AWAIT the notification BEFORE sending res.json.
-        try {
-            await NotificationService.sendCartNotification(cart, _id);
-        } catch (emailErr) {
-            console.error("Cart email notification error:", emailErr.message);
-        }
+        // Fire-and-forget email sending
+        NotificationService.sendCartNotification(cart, _id)
+            .then(() => console.log('✅ Email sent'))
+            .catch(err => console.error('❌ Email error:', err));
 
         res.json({ success: true, message: 'Cart Payment Verified and Orders Created!' });
 
@@ -250,12 +244,10 @@ export const createBypassedOrder = async (req, res) => {
             paymentId: 'pay_later'
         });
 
-        // ✅ FIX: AWAIT
-        try {
-            await NotificationService.sendOrderNotifications(newOrder._id);
-        } catch (emailErr) {
-            console.error("Bypassed order email error:", emailErr.message);
-        }
+        // Fire-and-forget email sending
+        NotificationService.sendOrderNotifications(newOrder._id)
+            .then(() => console.log('✅ Email sent'))
+            .catch(err => console.error('❌ Email error:', err));
 
         res.json({ success: true, message: 'Order Created Successfully (Pay Later)' });
 
