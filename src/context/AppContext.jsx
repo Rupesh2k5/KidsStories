@@ -6,7 +6,20 @@ export const backendUrl = (import.meta.env.VITE_BACKEND_URL || 'https://kidsstor
 export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
+    if (!savedCart) return [];
+    
+    // Sanitize any old localhost images from localStorage
+    try {
+      const parsedCart = JSON.parse(savedCart);
+      return parsedCart.map(item => {
+        if (item.image && item.image.includes('localhost')) {
+          item.image = '';
+        }
+        return item;
+      });
+    } catch {
+      return [];
+    }
   });
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);

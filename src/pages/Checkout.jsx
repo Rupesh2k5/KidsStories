@@ -39,7 +39,7 @@ const Checkout = () => {
 
       // 2. Open Razorpay Widget
       const options = {
-        key: "rzp_test_Ssv0yVvNYjiVr5", // Real Test Key from your .env
+        key: data.key_id, // Dynamically loaded from backend to prevent key mismatch
         amount: data.order.amount,
         currency: "INR",
         name: "KidsStories",

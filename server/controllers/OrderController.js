@@ -162,8 +162,9 @@ export const verifyAndCreateOrder = async (req, res) => {
 export const createCartRazorpayOrder = async (req, res) => {
     try {
         const { totalAmount } = req.body;
+        const key_id = process.env.RAZORPAY_KEY_ID || 'dummy_key_id';
         const razorpay = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key_id',
+            key_id: key_id,
             key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
         });
         const options = {
@@ -172,7 +173,7 @@ export const createCartRazorpayOrder = async (req, res) => {
             receipt: `receipt_${Date.now()}`,
         };
         const orderInfo = await razorpay.orders.create(options);
-        res.json({ success: true, order: orderInfo });
+        res.json({ success: true, order: orderInfo, key_id: key_id });
     } catch (err) {
         console.log(err);
         res.json({ success: false, message: err.message });
