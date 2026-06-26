@@ -288,19 +288,6 @@ export const getDashboardData=async(req,res)=>{
             monthlyRevenue,
             weekendOrders: weekendOrders.length,
             customers: {
-                list: customersList,
-                total: customersList.length,
-                repeatBuyers,
-                newThisMonth
-            },
-            revenueChart,
-            totalPlatformUsers
-        }
-        res.json({success:true, dashboardData})
-
-    }
-    catch(error){
-        console.log(error.message)
         res.json({success:false, message:error.message})
     }
 }
