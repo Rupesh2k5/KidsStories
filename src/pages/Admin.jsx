@@ -13,7 +13,15 @@ const Admin = () => {
   const handleAIPrompt = async (promptText) => {
     try {
       const toastId = toast.loading('Gemini is generating response...');
-      const { data } = await axios.post(backendUrl + '/api/ai/prompt', { prompt: promptText }, { headers: { token } });
+      const res = await fetch(`${backendUrl}/api/ai/prompt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ prompt: promptText })
+      });
+      const data = await res.json();
       if (data.success) {
         toast.dismiss(toastId);
         setAiResponse(data.text);
