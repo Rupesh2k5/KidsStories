@@ -606,7 +606,7 @@ const Admin = () => {
                 return (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>₹{val}</div>
-                    <div style={{ width: '40px', background: 'var(--primary)', borderRadius: '4px 4px 0 0', height: \`\${height}%\`, minHeight: '4px', transition: 'height 0.3s ease' }}></div>
+                    <div style={{ width: '40px', background: 'var(--primary)', borderRadius: '4px 4px 0 0', height: height + '%', minHeight: '4px', transition: 'height 0.3s ease' }}></div>
                   </div>
                 );
               }) : null}
