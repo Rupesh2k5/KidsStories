@@ -107,3 +107,15 @@ export const getCars = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 }
+import Visitor from '../models/visitor.js';
+export const logVisit = async(req, res) => {
+    try {
+        const { city } = req.body;
+        if(city) {
+            await Visitor.create({ city });
+        }
+        res.json({success: true});
+    } catch(err) {
+        res.json({success: false, message: err.message});
+    }
+}

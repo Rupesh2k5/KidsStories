@@ -1,3 +1,4 @@
+import Visitor from '../models/visitor.js';
 import imageKit from "../configs/imagekit.js";
 import user from "../models/user.js"
 import Book from "../models/book.js"
@@ -197,7 +198,9 @@ export const getDashboardData=async(req,res)=>{
 
         let books=await Book.find({owner:_id}).lean()
         let orders=await order.find({owner:_id}).populate('book').populate('user').sort({createdAt:-1}).lean()
-        const totalPlatformUsers = await user.countDocuments();
+        const totalPlatformUsers,
+            locations,
+            activeVisitors = await user.countDocuments();
         
         // Sanitize URLs to fix Mixed Content
         books = books.map(b => {
@@ -264,6 +267,19 @@ export const getDashboardData=async(req,res)=>{
                 revenueChart[6 - diffDays] += o.price; // index 6 is today, 0 is 6 days ago
             }
         });
+
+        
+        // Real-time Live Visitors (last 15 minutes)
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+        const recentVisitors = await Visitor.find({ timestamp: { $gte: fifteenMinutesAgo } }).lean();
+        
+        const cityCounts = {};
+        recentVisitors.forEach(v => {
+            cityCounts[v.city] = (cityCounts[v.city] || 0) + 1;
+        });
+        const locations = Object.entries(cityCounts).map(([city, count]) => ({city, count})).sort((a,b) => b.count - a.count).slice(0, 5);
+        
+        const activeVisitors = recentVisitors.length;
 
         const dashboardData={
             totalCars:books.length,

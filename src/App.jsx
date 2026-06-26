@@ -37,6 +37,41 @@ const AppContent = () => {
 };
 
 const App = () => {
+
+  // Track Live Visitor Location
+  useEffect(() => {
+    const trackVisit = async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        if(data.city) {
+           await fetch(backendUrl + '/api/user/log-visit', {
+             method: 'POST',
+             headers: {'Content-Type': 'application/json'},
+             body: JSON.stringify({ city: data.city })
+           });
+        }
+      } catch (error) {
+        // Alternative fallback: ask for location if IP API fails
+        if(navigator.geolocation) {
+           navigator.geolocation.getCurrentPosition(async (pos) => {
+               // We would ideally reverse geocode lat/lng here, but for simplicity we log 'Unknown (Coords)'
+               await fetch(backendUrl + '/api/user/log-visit', {
+                 method: 'POST',
+                 headers: {'Content-Type': 'application/json'},
+                 body: JSON.stringify({ city: 'Near ' + pos.coords.latitude.toFixed(1) + ',' + pos.coords.longitude.toFixed(1) })
+               });
+           }, () => {});
+        }
+      }
+    };
+    // Only track once per session to avoid spamming the backend
+    if(!sessionStorage.getItem('visited_store')) {
+       trackVisit();
+       sessionStorage.setItem('visited_store', 'true');
+    }
+  }, []);
+
   console.log("Vite cache bust 3 - App.jsx layout extracted");
   return (
     <AppProvider>
