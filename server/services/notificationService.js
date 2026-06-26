@@ -27,12 +27,6 @@ class NotificationService {
                 rejectUnauthorized: false
             }
         });
-        
-        // Force nodemailer to connect using IPv4 to bypass Render's IPv6 outbound block
-        this.transporter.getSocket = function (options, callback) {
-            options.family = 4;
-            return nodemailer.createTransport.prototype.getSocket ? nodemailer.createTransport.prototype.getSocket.call(this, options, callback) : null;
-        };
 
         // Initialize Twilio client only if credentials exist
         if (process.env.TWILIO_SID && process.env.TWILIO_TOKEN) {
