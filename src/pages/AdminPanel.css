@@ -265,6 +265,15 @@
     .pill-blue { background: var(--bg-accent); color: var(--text-accent); }
     .pill-gray { background: var(--surface-0); color: var(--text-secondary); border: 0.5px solid var(--border); }
 
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .metric-row:last-child { border-bottom: none; }
+
     .two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
