@@ -279,6 +279,36 @@ export const getDashboardData=async(req,res)=>{
         
         const activeVisitors = recentVisitors.length;
 
+        const dashboardData={
+            totalCars:books.length,
+            totalOrders:orders.length,
+            pendingOrders:pendingOrders.length,
+            completedOrders:completedOrders.length,
+            recentOrders:orders.slice(0,5),
+            monthlyRevenue,
+            weekendOrders: weekendOrders.length,
+            customers: {
+                list: customersList,
+                total: customersList.length,
+                repeatBuyers,
+                newThisMonth
+            },
+            revenueChart,
+            totalPlatformUsers
+        }
+        res.json({success:true, dashboardData})
+
+    }
+    catch(error){
+        console.log(error.message)
+        res.json({success:false, message:error.message})
+    }
+}
+
+
+export const updateUserImage=async(req,res)=>{
+    try{
+
         const {_id}=req.user
         
         const imageFile=req.file
