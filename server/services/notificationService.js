@@ -4,6 +4,10 @@ import book from '../models/book.js';
 import user from '../models/user.js';
 import https from 'https';
 import http from 'http';
+import dns from 'dns';
+
+// Force Node.js to prefer IPv4 over IPv6 to fix Render timeout issues with Google SMTP
+dns.setDefaultResultOrder('ipv4first');
 
 class NotificationService {
 
@@ -11,7 +15,9 @@ class NotificationService {
     // Always create fresh — env vars are read at call time, not cold-start.
     getTransporter() {
         return nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true, // Required to bypass Render's port 587 block
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
