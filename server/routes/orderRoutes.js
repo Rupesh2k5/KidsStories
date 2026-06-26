@@ -23,7 +23,7 @@ orderRouter.get('/test-email', async (req, res) => {
         const uniqueId = Math.floor(100000 + Math.random() * 900000);
         const targetEmail = req.query.email || 'rupesh.2k5chandra@gmail.com';
         
-        await NotificationService.transporter.sendMail({
+        await NotificationService.getTransporter().sendMail({
             from: `"KidsStories Test" <${process.env.EMAIL_USER}>`,
             to: targetEmail,
             subject: `Test Email Successful! [Test #${uniqueId}]`,
