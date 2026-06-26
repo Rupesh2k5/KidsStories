@@ -25,6 +25,11 @@ class NotificationService {
             connectionTimeout: 10000,
             greetingTimeout: 10000,
             socketTimeout: 15000,
+            tls: {
+                servername: 'smtp.gmail.com'
+            },
+            // Force IPv4 natively at the socket level
+            family: 4
         });
     }
 
