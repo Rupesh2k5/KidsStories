@@ -15,7 +15,7 @@ class NotificationService {
     // Always create fresh — env vars are read at call time, not cold-start.
     getTransporter() {
         return nodemailer.createTransport({
-            host: '142.250.110.108', // Hardcoded IPv4 for smtp.gmail.com to guarantee bypass of Render IPv6 block
+            host: 'smtp.gmail.com',
             port: 465,
             secure: true, // Required to bypass Render's port 587 block
             auth: {
@@ -36,6 +36,10 @@ class NotificationService {
     // ✅ FIX 2: Download PDF from a URL into a Buffer (no filesystem — works on Vercel)
     fetchPdfBuffer(url) {
         return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('PDF fetch timeout after 5 seconds'));
+            }, 5000);
+
             const get = url.startsWith('https') ? https.get.bind(https) : http.get.bind(http);
 
             const doGet = (targetUrl) => {
@@ -49,9 +53,18 @@ class NotificationService {
                     }
                     const chunks = [];
                     res.on('data', chunk => chunks.push(chunk));
-                    res.on('end', () => resolve(Buffer.concat(chunks)));
-                    res.on('error', reject);
-                }).on('error', reject);
+                    res.on('end', () => {
+                        clearTimeout(timeout);
+                        resolve(Buffer.concat(chunks));
+                    });
+                    res.on('error', (err) => {
+                        clearTimeout(timeout);
+                        reject(err);
+                    });
+                }).on('error', (err) => {
+                    clearTimeout(timeout);
+                    reject(err);
+                });
             };
 
             doGet(url);
