@@ -31,15 +31,22 @@ export const checkAvailabilityofCar=async(req,res)=>{
     try{
         const {location,pickupDate,returnDate}=req.body
 
-        const books=await book.find({location,isAvailable:true})
+        const books=await book.find({location,isAvailable:true}).lean()
 
         const availableCarsPromises=books.map(async(indi)=>{
             const isAvailable=await checkAvailability(indi._id,pickupDate,returnDate)
-            return {...indi._doc,isAvailable:isAvailable}
+            return {...indi,isAvailable:isAvailable}
         })
 
         let availableCars=await Promise.all(availableCarsPromises)
         availableCars=availableCars.filter(indi=>indi.isAvailable==true)
+        
+        // Sanitize localhost
+        availableCars = availableCars.map(b => {
+            if (b.image && b.image.includes('localhost')) b.image = '';
+            if (b.pdfUrl && b.pdfUrl.includes('localhost')) b.pdfUrl = '';
+            return b;
+        });
 
         res.json({success: true, availableCars})
 
@@ -260,7 +267,17 @@ export const createBypassedOrder = async (req, res) => {
 export const getUserOrders= async(req,res)=>{
     try{
         const {_id} =req.user;
-        const orders=await order.find({user:_id}).populate("book").sort({createdAt:-1})
+        let orders=await order.find({user:_id}).populate("book").sort({createdAt:-1}).lean()
+        
+        // Sanitize localhost URLs in populated book
+        orders = orders.map(o => {
+            if (o.book) {
+                if (o.book.image && o.book.image.includes('localhost')) o.book.image = '';
+                if (o.book.pdfUrl && o.book.pdfUrl.includes('localhost')) o.book.pdfUrl = '';
+            }
+            return o;
+        });
+
         res.json({success:true, orders})
     }
     catch(err){
@@ -274,7 +291,17 @@ export const getOwnerOrders=async(req,res)=>{
         if(req.user.role!=='owner'){
             return res.json({success:false, message:'Unauthorized'})
         }
-        const orders=await order.find({owner:req.user._id}).populate('book user').select('-user.password').sort({createdAt:-1})
+        let orders=await order.find({owner:req.user._id}).populate('book user').select('-user.password').sort({createdAt:-1}).lean()
+        
+        // Sanitize localhost URLs in populated book
+        orders = orders.map(o => {
+            if (o.book) {
+                if (o.book.image && o.book.image.includes('localhost')) o.book.image = '';
+                if (o.book.pdfUrl && o.book.pdfUrl.includes('localhost')) o.book.pdfUrl = '';
+            }
+            return o;
+        });
+
         res.json({success:true, orders})
     }
     catch(err){

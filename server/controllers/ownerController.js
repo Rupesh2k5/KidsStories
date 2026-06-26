@@ -187,12 +187,27 @@ export const getDashboardData=async(req,res)=>{
             return res.json({success:false, message:'Unauthorized'})
         }
 
-        const books=await Book.find({owner:_id})
+        let books=await Book.find({owner:_id}).lean()
+        let orders=await order.find({owner:_id}).populate('book').sort({createdAt:-1}).lean()
+        
+        // Sanitize localhost
+        books = books.map(b => {
+            if (b.image && b.image.includes('localhost')) b.image = '';
+            if (b.pdfUrl && b.pdfUrl.includes('localhost')) b.pdfUrl = '';
+            return b;
+        });
 
-        const orders=await order.find({owner:_id}).populate('book').sort({createdAt:-1})
-        const pendingOrders=await order.find({owner:_id, status:'pending'})
-        const completedOrders=await order.find({owner:_id,status:'confirmed'})
-        const monthlyRevenue=orders.slice().filter(book=>book.status==='confirmed').reduce((acc,book)=>acc + book.price,0)
+        orders = orders.map(o => {
+            if (o.book) {
+                if (o.book.image && o.book.image.includes('localhost')) o.book.image = '';
+                if (o.book.pdfUrl && o.book.pdfUrl.includes('localhost')) o.book.pdfUrl = '';
+            }
+            return o;
+        });
+
+        const pendingOrders=orders.filter(o=>o.status==='pending')
+        const completedOrders=orders.filter(o=>o.status==='confirmed')
+        const monthlyRevenue=completedOrders.reduce((acc,book)=>acc + book.price,0)
 
         // Calculate weekend orders
         const weekendOrders = orders.filter(o => {
