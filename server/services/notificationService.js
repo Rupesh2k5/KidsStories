@@ -10,15 +10,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 class NotificationService {
-    constructor() {
-        this.transporter = nodemailer.createTransport({
+    getTransporter() {
+        return nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
             }
         });
+    }
 
+    constructor() {
         // Initialize Twilio client only if credentials exist
         if (process.env.TWILIO_SID && process.env.TWILIO_TOKEN) {
             this.twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
@@ -55,12 +57,15 @@ class NotificationService {
             const emailTextUser = `Hi ${userData.name},\n\nThank you for shopping with us! Your order (#${uniqueId}) has been successfully placed.\n\n=== YOUR DIGITAL BOOKS ===\n\n${itemsList}\n\n=========================\nTotal Paid: ₹${total}\n\nHappy reading! 📚✨\n\nBest regards,\nKidsStories Team`;
 
             if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-                await this.transporter.sendMail({
+                await this.getTransporter().sendMail({
                     from: `"KidsStories Store" <${process.env.EMAIL_USER}>`,
                     to: userData.email,
                     subject: emailSubjectUser,
                     text: emailTextUser
                 });
+                console.log(`✅ Cart email sent to ${userData.email}`);
+            } else {
+                console.error('❌ EMAIL_USER or EMAIL_PASS missing from env');
             }
         } catch (error) {
             console.error("Notification Service Error:", error);
@@ -81,14 +86,16 @@ class NotificationService {
             const pdfLink = bookData.pdfUrl ? bookData.pdfUrl : `${process.env.FRONTEND_URL || 'https://kids-stories-olive.vercel.app'}/TheMindroo_Kids_Activity_Book.pdf`;
             const emailTextUser = `Hi ${userData.name},\n\nYour order (#${uniqueId}) for ${bookData.brand} has been confirmed.\nAmount Paid: ₹${orderDoc.price}\n\n📥 DOWNLOAD LINK:\n${pdfLink}\n\nThank you for choosing KidsStories!`;
 
-            // Send Emails
             if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-                await this.transporter.sendMail({
+                await this.getTransporter().sendMail({
                     from: `"KidsStories" <${process.env.EMAIL_USER}>`,
                     to: userData.email,
                     subject: emailSubjectUser,
                     text: emailTextUser
                 });
+                console.log(`✅ Order email sent to ${userData.email}`);
+            } else {
+                console.error('❌ EMAIL_USER or EMAIL_PASS missing from env');
             }
         } catch (error) {
             console.error("Notification Service Error:", error);
