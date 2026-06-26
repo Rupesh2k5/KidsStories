@@ -20,11 +20,12 @@ orderRouter.get('/test-email', async (req, res) => {
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
             return res.json({ success: false, message: "Server is missing EMAIL_USER or EMAIL_PASS environment variables" });
         }
+        const uniqueId = Math.floor(100000 + Math.random() * 900000);
         await NotificationService.transporter.sendMail({
             from: `"KidsStories Test" <${process.env.EMAIL_USER}>`,
             to: process.env.EMAIL_USER,
-            subject: 'Test Email Successful!',
-            text: 'If you are reading this, your email configuration on Render is working perfectly! You can now receive order emails.'
+            subject: `Test Email Successful! [Test #${uniqueId}]`,
+            text: `If you are reading this, your email configuration on Render is working perfectly! You can now receive order emails.\n\nTest ID: ${uniqueId}`
         });
         res.json({ success: true, message: "Email sent successfully to " + process.env.EMAIL_USER });
     } catch (err) {
