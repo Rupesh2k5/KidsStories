@@ -266,7 +266,7 @@ export const getDashboardData=async(req,res)=>{
             }
         });
 
-        
+
         // Real-time Live Visitors (last 15 minutes)
         const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
         const recentVisitors = await Visitor.find({ timestamp: { $gte: fifteenMinutesAgo } }).lean();
@@ -288,6 +288,21 @@ export const getDashboardData=async(req,res)=>{
             monthlyRevenue,
             weekendOrders: weekendOrders.length,
             customers: {
+                list: customersList,
+                total: customersList.length,
+                repeatBuyers,
+                newThisMonth
+            },
+            revenueChart,
+            totalPlatformUsers,
+            locations,
+            activeVisitors
+        }
+        res.json({success:true, dashboardData})
+
+    }
+    catch(error){
+        console.log(error.message)
         res.json({success:false, message:error.message})
     }
 }
