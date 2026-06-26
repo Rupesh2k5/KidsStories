@@ -55,9 +55,10 @@ class NotificationService {
             }).join('\n\n');
             
             const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-            const emailSubjectUser = `Your Magical Books Order is Confirmed! 🎉`;
-            const emailTextUser = `Hi ${userData.name},\n\nThank you for shopping with us! Your order has been successfully placed.\n\n=== YOUR DIGITAL BOOKS ===\n\n${itemsList}\n\n=========================\nTotal Paid: ₹${total}\n\nHappy reading! 📚✨\n\nBest regards,\nKidsStories Team`;
+            
+            const uniqueId = Math.floor(100000 + Math.random() * 900000);
+            const emailSubjectUser = `Your Magical Books Order is Confirmed! 🎉 [Order #${uniqueId}]`;
+            const emailTextUser = `Hi ${userData.name},\n\nThank you for shopping with us! Your order (#${uniqueId}) has been successfully placed.\n\n=== YOUR DIGITAL BOOKS ===\n\n${itemsList}\n\n=========================\nTotal Paid: ₹${total}\n\nHappy reading! 📚✨\n\nBest regards,\nKidsStories Team`;
 
             if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
                 await this.transporter.sendMail({
@@ -81,9 +82,10 @@ class NotificationService {
             const bookData = orderDoc.book;
             const userData = orderDoc.user;
 
-            const emailSubjectUser = `Order Confirmed: ${bookData.brand} ${bookData.model !== 'Single Book' ? bookData.model : ''}`;
+            const uniqueId = orderId.toString().slice(-6).toUpperCase();
+            const emailSubjectUser = `Order Confirmed: ${bookData.brand} ${bookData.model !== 'Single Book' ? bookData.model : ''} [Order #${uniqueId}]`;
             const pdfLink = bookData.pdfUrl ? bookData.pdfUrl : `${process.env.FRONTEND_URL || 'https://kids-stories-olive.vercel.app'}/TheMindroo_Kids_Activity_Book.pdf`;
-            const emailTextUser = `Hi ${userData.name},\n\nYour order for ${bookData.brand} has been confirmed.\nAmount Paid: ₹${orderDoc.price}\n\n📥 DOWNLOAD LINK:\n${pdfLink}\n\nThank you for choosing KidsStories!`;
+            const emailTextUser = `Hi ${userData.name},\n\nYour order (#${uniqueId}) for ${bookData.brand} has been confirmed.\nAmount Paid: ₹${orderDoc.price}\n\n📥 DOWNLOAD LINK:\n${pdfLink}\n\nThank you for choosing KidsStories!`;
 
             // Send Emails
             if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
