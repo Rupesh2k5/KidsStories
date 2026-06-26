@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, backendUrl } from './context/AppContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
