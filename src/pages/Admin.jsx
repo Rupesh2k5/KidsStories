@@ -186,14 +186,19 @@ const Admin = () => {
     <div className="shell">
       {/* SIDEBAR */}
       <aside className="sidebar">
-        <div className="logo">
-          <div className="logo-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <div className="logo" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="logo-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div>
+              <div className="logo-text">KidsStories</div>
+              <div className="logo-sub">Admin Panel</div>
+            </div>
           </div>
-          <div>
-            <div className="logo-text">KidsStories</div>
-            <div className="logo-sub">Admin Panel</div>
-          </div>
+          <button className="btn btn-sm" onClick={() => navigate('/')} style={{ width: '100%', justifyContent: 'center' }}>
+            <i className="fas fa-arrow-left"></i> Back to Store
+          </button>
         </div>
         <nav>
           <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}><i className="fas fa-home"></i> <span>Home</span></div>
