@@ -408,21 +408,6 @@ const Admin = () => {
         <div className="stats-grid">
           <div className="stat-card"><div className="stat-label">Total customers</div><div className="stat-value">{dashboardData?.customers?.total || 0}</div></div>
           <div className="stat-card"><div className="stat-label">New this month</div><div className="stat-value">{dashboardData?.customers?.newThisMonth || 0}</div></div>
-          <div className="stat-card"><div className="stat-label">Repeat buyers</div><div className="stat-value">{dashboardData?.customers?.repeatBuyers || 0}</div></div>
-        </div>
-        <div className="card" style={{ padding: '0' }}>
-          <table className="table">
-            <thead><tr><th>Name</th><th>Email</th><th>Orders</th><th>Total spent</th><th>Last order</th></tr></thead>
-            <tbody>
-              <tr><td>Priya S.</td><td>priya@gmail.com</td><td>4</td><td>₹796</td><td>Today</td></tr>
-              <tr><td>Arjun M.</td><td>arjun@gmail.com</td><td>2</td><td>₹549</td><td>Today</td></tr>
-              <tr><td>Neha R.</td><td>neha@gmail.com</td><td>1</td><td>₹199</td><td>Yesterday</td></tr>
-              <tr><td>Vikram K.</td><td>vikram@gmail.com</td><td>3</td><td>₹598</td><td>2 days ago</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-)}
 {/*  ========== META ADS ==========  */}
       {activeTab === 'meta-ads' && (
 <div className="page active">
