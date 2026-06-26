@@ -599,7 +599,18 @@ const Admin = () => {
           </div>
           <div className="card">
             <div className="card-header"><span className="card-title">Revenue — last 7 days</span></div>
-            <div className="chart-placeholder" id="rev-chart"></div>
+            <div className="chart-placeholder" id="rev-chart" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', padding: '10px 0', height: '150px' }}>
+              {dashboardData?.revenueChart ? dashboardData.revenueChart.map((val, i) => {
+                const max = Math.max(...dashboardData.revenueChart, 100);
+                const height = Math.round((val / max) * 100);
+                return (
+                  <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>₹{val}</div>
+                    <div style={{ width: '40px', background: 'var(--primary)', borderRadius: '4px 4px 0 0', height: \`\${height}%\`, minHeight: '4px', transition: 'height 0.3s ease' }}></div>
+                  </div>
+                );
+              }) : null}
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 12px 0', fontSize: '11px', color: 'var(--text-muted)' }}>
               <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
             </div>
