@@ -198,9 +198,7 @@ export const getDashboardData=async(req,res)=>{
 
         let books=await Book.find({owner:_id}).lean()
         let orders=await order.find({owner:_id}).populate('book').populate('user').sort({createdAt:-1}).lean()
-        const totalPlatformUsers,
-            locations,
-            activeVisitors = await user.countDocuments();
+        const totalPlatformUsers = await user.countDocuments();
         
         // Sanitize URLs to fix Mixed Content
         books = books.map(b => {
@@ -290,19 +288,6 @@ export const getDashboardData=async(req,res)=>{
             monthlyRevenue,
             weekendOrders: weekendOrders.length,
             customers: {
-                list: customersList,
-                total: customersList.length,
-                repeatBuyers,
-                newThisMonth
-            },
-            revenueChart,
-            totalPlatformUsers
-        }
-        res.json({success:true, dashboardData})
-
-    }
-    catch(error){
-        console.log(error.message)
         res.json({success:false, message:error.message})
     }
 }
