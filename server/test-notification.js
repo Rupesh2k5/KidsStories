@@ -10,7 +10,7 @@ dotenv.config({ path: '../.env' });
 async function test() {
     try {
         console.log("Connecting to MongoDB...");
-        await mongoose.connect('mongodb+srv://rupesh2k5chandra:Rupesh123@cluster0.ooh8q.mongodb.net/wise-pascal?retryWrites=true&w=majority&appName=Cluster0');
+        await mongoose.connect(process.env.MONGODB_URI);
         console.log("Connected.");
         
         // Find a recent order
