@@ -25,6 +25,7 @@ orderRouter.post('/create-bypassed', protect, createBypassedOrder);
 orderRouter.post('/cart/create-razorpay-order', protect, createCartRazorpayOrder);
 orderRouter.post('/cart/verify-order', protect, verifyCartOrder);
 orderRouter.get('/user', protect, getUserOrders);
+orderRouter.get('/user-orders', protect, getUserOrders); // Alias for frontend Profile.jsx
 orderRouter.get('/owner', protect, getOwnerOrders);
 orderRouter.get('/dates/:bookId', getCarBookedDates);
 
