@@ -8,6 +8,22 @@ const Admin = () => {
   const { user } = useContext(AppContext);
   const [activeTab, setActiveTab] = useState('home');
   const [analyticsTab, setAnalyticsTab] = useState('overview');
+  const [aiResponse, setAiResponse] = useState('');
+
+  const handleAIPrompt = async (promptText) => {
+    try {
+      const toastId = toast.loading('Gemini is generating response...');
+      const { data } = await axios.post(backendUrl + '/api/ai/prompt', { prompt: promptText }, { headers: { token } });
+      if (data.success) {
+        toast.dismiss(toastId);
+        setAiResponse(data.text);
+      } else {
+        toast.error(data.message, { id: toastId });
+      }
+    } catch (error) {
+      toast.error('Failed to generate response');
+    }
+  };
   const [dashboardData, setDashboardData] = useState(null);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -253,10 +269,10 @@ const Admin = () => {
               
               <div className="two-col">
                 <div className="card">
-                  <div className="card-header"><span className="card-title">Customer behavior (Demo)</span></div>
-                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Active carts</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '30%', background: 'var(--fill-accent)'}}></div></div><div className="funnel-val">3</div></div>
-                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Checking out</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '15%', background: 'var(--fill-warning)'}}></div></div><div className="funnel-val">1</div></div>
-                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Purchased</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '20%', background: 'var(--fill-success)'}}></div></div><div className="funnel-val">{dashboardData.completedOrders}</div></div>
+                  <div className="card-header"><span className="card-title">Customer behavior (Live)</span></div>
+                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Registered Users</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '30%', background: 'var(--fill-accent)'}}></div></div><div className="funnel-val">{dashboardData?.totalPlatformUsers || 0}</div></div>
+                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Pending Orders</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '15%', background: 'var(--fill-warning)'}}></div></div><div className="funnel-val">{dashboardData?.pendingOrders || 0}</div></div>
+                  <div className="funnel-row"><div className="funnel-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Completed Orders</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{width: '20%', background: 'var(--fill-success)'}}></div></div><div className="funnel-val">{dashboardData.completedOrders}</div></div>
                 </div>
                 <div className="card">
                   <div className="card-header"><span className="card-title">Recent orders</span></div>
@@ -382,9 +398,9 @@ const Admin = () => {
         <div className="page-title">Customers</div>
         <div className="page-sub">Your registered buyers and their activity</div>
         <div className="stats-grid">
-          <div className="stat-card"><div className="stat-label">Total customers</div><div className="stat-value">284</div></div>
-          <div className="stat-card"><div className="stat-label">New this month</div><div className="stat-value">38</div><div className="stat-delta delta-up">+22%</div></div>
-          <div className="stat-card"><div className="stat-label">Repeat buyers</div><div className="stat-value">96</div><div className="stat-delta">34%</div></div>
+          <div className="stat-card"><div className="stat-label">Total customers</div><div className="stat-value">{dashboardData?.customers?.total || 0}</div></div>
+          <div className="stat-card"><div className="stat-label">New this month</div><div className="stat-value">{dashboardData?.customers?.newThisMonth || 0}</div></div>
+          <div className="stat-card"><div className="stat-label">Repeat buyers</div><div className="stat-value">{dashboardData?.customers?.repeatBuyers || 0}</div></div>
         </div>
         <div className="card" style={{ padding: '0' }}>
           <table className="table">
@@ -518,7 +534,7 @@ const Admin = () => {
             <div className="metric-row"><span style={{ fontSize: '13px' }}>Clicks from search</span><span style={{ fontWeight: '500', color: 'var(--text-accent)' }}>312</span></div>
             <div className="metric-row"><span style={{ fontSize: '13px' }}>Average position</span><span style={{ fontWeight: '500' }}>#14.2</span></div>
             <div className="metric-row"><span style={{ fontSize: '13px' }}>CTR</span><span style={{ fontWeight: '500' }}>3.7%</span></div>
-            <div style={{ marginTop: '12px' }}><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>Top query: "kids activity books india"</div><button className="btn btn-sm" style={{ width: '100%' }} onClick={() => alert('AI Prompt Feature (Demo)')}>Get SEO tips for this ↗</button></div>
+            <div style={{ marginTop: '12px' }}><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>Top query: "kids activity books india"</div><button className="btn btn-sm" style={{ width: '100%' }} onClick={(e) => { const prompt = e.target.getAttribute('data-prompt') || 'Provide tips for this feature'; handleAIPrompt(prompt); }}>Get SEO tips for this ↗</button></div>
           </div>
         </div>
 
@@ -530,7 +546,7 @@ const Admin = () => {
           <div className="form-row"><label className="form-label">Meta description (max 160 chars)</label>
             <textarea className="form-input" rows="2" style={{ resize: 'vertical' }}>A magical journey for kids aged 4-8. Download and read The Magic Forest — an enchanting story that sparks imagination. Order today!</textarea></div>
           <div className="form-row"><label className="form-label">URL handle</label><input className="form-input" type="text" value="products/the-magic-forest" /></div>
-          <div style={{ display: 'flex', gap: '8px' }}><button className="btn btn-primary btn-sm" onClick={() => alert('Demo feature')}><i className="fas fa-check"></i> Save SEO settings</button><button className="btn btn-sm" onClick={() => alert('AI Prompt Feature (Demo)')}>Generate with AI ↗</button></div>
+          <div style={{ display: 'flex', gap: '8px' }}><button className="btn btn-primary btn-sm" onClick={() => alert('Demo feature')}><i className="fas fa-check"></i> Save SEO settings</button><button className="btn btn-sm" onClick={(e) => { const prompt = e.target.getAttribute('data-prompt') || 'Provide tips for this feature'; handleAIPrompt(prompt); }}>Generate with AI ↗</button></div>
         </div>
 
         <div className="card">
@@ -538,8 +554,8 @@ const Admin = () => {
           <table className="table">
             <thead><tr><th>Keyword</th><th>Monthly searches</th><th>Difficulty</th><th>Your rank</th><th>Action</th></tr></thead>
             <tbody>
-              <tr><td>kids story books online india</td><td>8,100</td><td><span className="pill pill-amber">Medium</span></td><td>#28</td><td><button className="btn btn-sm" onClick={() => alert('AI Prompt Feature (Demo)')}>Improve ↗</button></td></tr>
-              <tr><td>activity books for kids</td><td>5,400</td><td><span className="pill pill-green">Easy</span></td><td>#12</td><td><button className="btn btn-sm" onClick={() => alert('AI Prompt Feature (Demo)')}>Improve ↗</button></td></tr>
+              <tr><td>kids story books online india</td><td>8,100</td><td><span className="pill pill-amber">Medium</span></td><td>#28</td><td><button className="btn btn-sm" onClick={(e) => { const prompt = e.target.getAttribute('data-prompt') || 'Provide tips for this feature'; handleAIPrompt(prompt); }}>Improve ↗</button></td></tr>
+              <tr><td>activity books for kids</td><td>5,400</td><td><span className="pill pill-green">Easy</span></td><td>#12</td><td><button className="btn btn-sm" onClick={(e) => { const prompt = e.target.getAttribute('data-prompt') || 'Provide tips for this feature'; handleAIPrompt(prompt); }}>Improve ↗</button></td></tr>
               <tr><td>children books rent</td><td>1,900</td><td><span className="pill pill-green">Easy</span></td><td>#6</td><td><button className="btn btn-sm">Optimized</button></td></tr>
             </tbody>
           </table>
@@ -593,7 +609,7 @@ const Admin = () => {
             <div className="funnel-row"><div className="funnel-label">Reached checkout</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '8%', background: 'var(--fill-warning)' }}></div></div><div className="funnel-val">156</div><div className="funnel-pct">8%</div></div>
             <div className="funnel-row"><div className="funnel-label">Purchased</div><div className="funnel-bar-wrap"><div className="funnel-fill" style={{ width: '3.5%', background: 'var(--fill-success)' }}></div></div><div className="funnel-val">68</div><div className="funnel-pct">3.5%</div></div>
           </div>
-          <div style={{ marginTop: '8px' }}><button className="btn" onClick={() => alert('AI Prompt Feature (Demo)')}>Get conversion tips ↗</button></div>
+          <div style={{ marginTop: '8px' }}><button className="btn" onClick={(e) => { const prompt = e.target.getAttribute('data-prompt') || 'Provide tips for this feature'; handleAIPrompt(prompt); }}>Get conversion tips ↗</button></div>
         </div>
       </div>
 )}
@@ -677,7 +693,23 @@ const Admin = () => {
         </div>
       </div>
       )}
+        
+      {aiResponse && (
+        <div style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.5)', zIndex:9999, display:'flex', justifyContent:'center', alignItems:'center'}}>
+          <div style={{background:'white', padding:'30px', borderRadius:'15px', width:'90%', maxWidth:'700px', maxHeight:'85vh', overflowY:'auto', boxShadow:'0 10px 30px rgba(0,0,0,0.2)'}}>
+            <h3 style={{marginTop:0, color:'var(--primary)', display:'flex', alignItems:'center', gap:'10px'}}>
+              <i className="fas fa-sparkles"></i> AI Suggestion
+            </h3>
+            <div style={{whiteSpace:'pre-wrap', lineHeight:'1.6', fontSize:'14px', color:'#444', background:'#f8f9fa', padding:'20px', borderRadius:'10px', border:'1px solid #eee'}}>
+              {aiResponse}
+            </div>
+            <div style={{marginTop:'20px', textAlign:'right'}}>
+              <button onClick={() => setAiResponse('')} className="btn btn-primary">Close</button>
+            </div>
+          </div>
         </div>
+      )}
+</div>
       </div>
     </div>
   );

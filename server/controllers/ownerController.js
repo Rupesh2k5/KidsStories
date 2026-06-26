@@ -196,7 +196,8 @@ export const getDashboardData=async(req,res)=>{
         }
 
         let books=await Book.find({owner:_id}).lean()
-        let orders=await order.find({owner:_id}).populate('book').sort({createdAt:-1}).lean()
+        let orders=await order.find({owner:_id}).populate('book').populate('user').sort({createdAt:-1}).lean()
+        const totalPlatformUsers = await user.countDocuments();
         
         // Sanitize URLs to fix Mixed Content
         books = books.map(b => {
@@ -223,14 +224,63 @@ export const getDashboardData=async(req,res)=>{
             return day === 0 || day === 6; // Sunday(0) or Saturday(6)
         });
 
+        // Calculate real customer data
+        const customerMap = {};
+        orders.forEach(o => {
+            if (!o.user) return;
+            const uid = o.user._id.toString();
+            if (!customerMap[uid]) {
+                customerMap[uid] = {
+                    name: o.user.name,
+                    email: o.user.email,
+                    orders: 0,
+                    totalSpent: 0,
+                    lastOrder: o.createdAt
+                };
+            }
+            customerMap[uid].orders += 1;
+            if (o.status === 'confirmed') {
+                customerMap[uid].totalSpent += o.price;
+            }
+            if (new Date(o.createdAt) > new Date(customerMap[uid].lastOrder)) {
+                customerMap[uid].lastOrder = o.createdAt;
+            }
+        });
+
+        const customersList = Object.values(customerMap);
+        const repeatBuyers = customersList.filter(c => c.orders > 1).length;
+        const currentMonth = new Date().getMonth();
+        const newThisMonth = customersList.filter(c => new Date(c.lastOrder).getMonth() === currentMonth).length;
+
+        // Calculate real revenue chart (last 7 days)
+        const revenueChart = Array(7).fill(0);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        completedOrders.forEach(o => {
+            const orderDate = new Date(o.createdAt);
+            orderDate.setHours(0,0,0,0);
+            const diffDays = Math.floor((today - orderDate) / (1000 * 60 * 60 * 24));
+            if (diffDays >= 0 && diffDays < 7) {
+                revenueChart[6 - diffDays] += o.price; // index 6 is today, 0 is 6 days ago
+            }
+        });
+
         const dashboardData={
             totalCars:books.length,
             totalOrders:orders.length,
             pendingOrders:pendingOrders.length,
             completedOrders:completedOrders.length,
-            recentOrders:orders.slice(0,4),
+            recentOrders:orders.slice(0,5),
             monthlyRevenue,
-            weekendOrders: weekendOrders.length
+            weekendOrders: weekendOrders.length,
+            customers: {
+                list: customersList,
+                total: customersList.length,
+                repeatBuyers,
+                newThisMonth
+            },
+            revenueChart,
+            totalPlatformUsers
         }
         res.json({success:true, dashboardData})
 

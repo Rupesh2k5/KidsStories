@@ -6,6 +6,7 @@ import userRouter from './routes/userRoutes.js'
 import ownerRouter from './routes/ownerRoutes.js'
 import orderRouter from './routes/orderRoutes.js'
 import reviewRouter from './routes/reviewRoutes.js'
+import aiRouter from './routes/aiRoutes.js'
 //Intialize Express
 const app=express()
 
@@ -26,6 +27,7 @@ app.use('/api/user',userRouter)
 app.use('/api/owner',ownerRouter)
 app.use('/api/order',orderRouter)
 app.use('/api/review',reviewRouter)
+app.use('/api/ai', aiRouter)
 
 
 const PORT = process.env.PORT || 3000;
