@@ -52,7 +52,15 @@ export const checkAvailabilityofCar=async(req,res)=>{
 
 export const getAvailableBooks = async (req, res) => {
     try {
-        const books = await book.find({ isAvailable: true });
+        let books = await book.find({ isAvailable: true }).lean();
+        
+        // Remove localhost references from the database output
+        books = books.map(b => {
+            if (b.image && b.image.includes('localhost')) b.image = '';
+            if (b.pdfUrl && b.pdfUrl.includes('localhost')) b.pdfUrl = '';
+            return b;
+        });
+
         res.json({ success: true, books });
     } catch (err) {
         res.json({ success: false, message: err.message });

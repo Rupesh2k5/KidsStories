@@ -69,8 +69,15 @@ export const addCar=async(req,res)=>{
 export const getOwnerCars=async(req,res)=>{
     try{
         const {_id}=req.user
-        const books = await Book.find({owner:_id}).lean()
+        let books = await Book.find({owner:_id}).lean()
         const orders = await order.find({owner:_id, status: { $in: ['pending', 'confirmed'] }})
+
+        // Sanitize localhost URLs
+        books = books.map(b => {
+            if (b.image && b.image.includes('localhost')) b.image = '';
+            if (b.pdfUrl && b.pdfUrl.includes('localhost')) b.pdfUrl = '';
+            return b;
+        });
 
         books.forEach(book => {
             book.orders = orders
